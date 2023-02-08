@@ -31,5 +31,7 @@ router.get('/right/deleteRight', rightController.deleteRight)
 // 公司
 const companyController = require('./controller/companyController')
 router.get('/company/companyInfo', companyController.companyInfo)
+router.get('/company/searchCompany', companyController.searchCompany)
+router.get('/company/dataPanel', companyController.dataPanel)
 
 module.exports = router
