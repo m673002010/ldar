@@ -1,4 +1,5 @@
 global.config = require('./config')
+const path = require('path')
 start()
 
 async function start () {
@@ -9,8 +10,10 @@ async function start () {
     // 中间件
     const Koa = require('koa')
     const router = require('./router.js')
-    const bodyParser = require('koa-bodyparser')
+    const { koaBody } = require('koa-body')
+    // const bodyParser = require('koa-bodyparser')
     const rq = require('./lib/req')
+    const KoaStatic = require('koa-static')
     const { checkLogin } = require('./middleware/checkLogin')
     const { checkRight } = require('./middleware/checkRight')
 
@@ -30,6 +33,8 @@ async function start () {
         await next()
     })
 
+    app.use(KoaStatic(path.join(__dirname, './static')))
+
     // 校验登录
     app.use(checkLogin)
     app.use(checkRight)
@@ -39,7 +44,8 @@ async function start () {
         await next()
     })
 
-    app.use(bodyParser())
+    // app.use(bodyParser())
+    app.use(koaBody({ multipart: true, urlencoded: true }))
     app.use(router.routes())
 
     app.listen(config.port)

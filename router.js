@@ -34,4 +34,8 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 静态资源
+const resourceController = require('./controller/resourceController')
+router.get('/resource/onSitePicture', resourceController.onSitePicture)
+
 module.exports = router

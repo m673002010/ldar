@@ -36,6 +36,11 @@ async function deleteRole (ctx, next) {
 
 async function allocateRights (ctx, next) {
     const { roleId = 0, rightIds = [] } = ctx.request.body
+
+    console.log(rightIds instanceof Array)
+    console.log(typeof rightIds)
+    console.log(rightIds)
+
     if (!+roleId) {
         ctx.body = { code: -1, message: '参数缺失' }
         return
