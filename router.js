@@ -34,6 +34,12 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 基础参数
+const paramController = require('./controller/paramController')
+router.post('/param/importData', paramController.importData)
+router.get('/param/instrumentDetectionStatistics', paramController.instrumentDetectionStatistics)
+router.get('/param/deleteData', paramController.deleteData)
+
 // 静态资源
 const resourceController = require('./controller/resourceController')
 router.get('/resource/onSitePicture', resourceController.onSitePicture)

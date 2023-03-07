@@ -6,7 +6,7 @@ const lodash = require('lodash')
 async function checkRight (ctx, next) {
     try {
         const arr = ['/user/login', '/user/logout', '/user/register', '/company/companyInfo', 
-        '/company/searchCompany']
+        '/company/searchCompany', '/user/userInfo']
 
         if (arr.includes(ctx.path)) await next()
         else {
