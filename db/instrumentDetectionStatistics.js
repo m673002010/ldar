@@ -1,5 +1,6 @@
 /**
 {
+    companyNum: String,
     year: String,
     quarter: String,
     instrumentNum: String,

@@ -22,7 +22,7 @@ async function login (ctx, next) {
     const { username = '', password = '' } = ctx.request.body
     if (!username || !password) {
         ctx.body = { code: -1, message: '帐密填写不完整' }
-        return 
+        return
     }
 
     ctx.body = await userService.login(ctx, next)

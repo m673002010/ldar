@@ -65,7 +65,7 @@ async function login (ctx, next) {
         if (user.password !== md5Password) return { code: -1 , message: '密码错误' }
 
         // 签发 token，1天有效期
-        const userInfo = { username, userId: user.userId }
+        const userInfo = { username, userId: user.userId, companyNum: user.companyNum }
         const token = jwt.sign(userInfo, config.privateKey, { expiresIn: '1d' }) 
         return { code: 0 , message: '登陆成功', data: { token } }
 

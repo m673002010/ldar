@@ -1,5 +1,6 @@
 /**
 {
+    companyNum: String,
     mediumNum: String,
     medium: String,
     report: String,

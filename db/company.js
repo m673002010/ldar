@@ -5,8 +5,8 @@
     shortName: String,
     province: String,
     city: String,
-    createTime: Date,
-    updateTime: Date
+    createDate: Date,
+    updateDate: Date
 }
  */
 const companyCollection = mongoDb.collection('company')
