@@ -34,11 +34,18 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
-// 基础参数
-const paramController = require('./controller/paramController')
-router.post('/param/importData', paramController.importData)
-router.get('/param/instrumentDetectionStatistics', paramController.instrumentDetectionStatistics)
-router.get('/param/deleteData', paramController.deleteData)
+// 介质状态
+const MediumController = require('./controller/mediumController')
+router.get('/medium/queryMedium', MediumController.queryMedium)
+router.post('/medium/addMedium', MediumController.addMedium)
+router.post('/medium/editMedium', MediumController.editMedium)
+router.get('/medium/deleteMedium', MediumController.deleteMedium)
+
+// 仪器检测统计
+const iDSController = require('./controller/iDSController')
+router.post('/iDS/importData', iDSController.importData)
+router.get('/iDS/instrumentDetectionStatistics', iDSController.instrumentDetectionStatistics)
+router.get('/iDS/deleteData', iDSController.deleteData)
 
 // 静态资源
 const resourceController = require('./controller/resourceController')
