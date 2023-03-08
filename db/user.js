@@ -4,6 +4,7 @@
     username: String,
     password: String,
     roles: Array,
+    companyNum: String,
     createTime: Date,
     updateTime: Date
 }

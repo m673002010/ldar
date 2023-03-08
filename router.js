@@ -42,10 +42,10 @@ router.post('/medium/editMedium', MediumController.editMedium)
 router.get('/medium/deleteMedium', MediumController.deleteMedium)
 
 // 仪器检测统计
-const iDSController = require('./controller/iDSController')
-router.post('/iDS/importData', iDSController.importData)
-router.get('/iDS/instrumentDetectionStatistics', iDSController.instrumentDetectionStatistics)
-router.get('/iDS/deleteData', iDSController.deleteData)
+const idsController = require('./controller/idsController')
+router.post('/ids/importData', idsController.importData)
+router.get('/ids/instrumentDetectionStatistics', idsController.instrumentDetectionStatistics)
+router.get('/ids/deleteData', idsController.deleteData)
 
 // 静态资源
 const resourceController = require('./controller/resourceController')
