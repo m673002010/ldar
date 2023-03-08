@@ -1,53 +1,69 @@
-global.config = require('./config')
 const path = require('path')
 start()
 
 async function start () {
-    // 连接数据库
-    const res = await require('./db').connectDb()
-    if (!res) console.log('server start fail ...')
+    try {
+        // 配置
+        global.config = require('./config')
 
-    // 中间件
-    const Koa = require('koa')
-    const router = require('./router.js')
-    const { koaBody } = require('koa-body')
-    // const bodyParser = require('koa-bodyparser')
-    const rq = require('./lib/req')
-    const KoaStatic = require('koa-static')
-    const { checkLogin } = require('./middleware/checkLogin')
-    const { checkRight } = require('./middleware/checkRight')
+        // 日志
+        global.logger = require('./lib/logger') 
 
-    const app = new Koa()
+        // 连接数据库
+        const res = await require('./db').connectDb()
+        if (!res) logger.log('server start fail ...:')
 
-    // 解决跨域
-    app.use(async (ctx, next)=> {
-        ctx.set('Access-Control-Allow-Origin', '*')
-        ctx.set('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild')
-        ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
-        // ctx.set('Access-Control-Allow-Credentials', 'true')
-        // 预请求直接响应
-        if(ctx.request.method === 'OPTIONS'){
-            ctx.body = 200
-            return
-        }
-        await next()
-    })
+        // 中间件
+        const Koa = require('koa')
+        const router = require('./router.js')
+        const { koaBody } = require('koa-body')
+        // const bodyParser = require('koa-bodyparser')
+        const rq = require('./lib/req')
+        const KoaStatic = require('koa-static')
+        const { checkLogin } = require('./middleware/checkLogin')
+        const { checkRight } = require('./middleware/checkRight')
+        const { ctxLog } = require('./middleware/log')
+        const { requestId } = require('./middleware/requestId')
 
-    app.use(KoaStatic(path.join(__dirname, './static')))
+        const app = new Koa()
 
-    // 校验登录
-    app.use(checkLogin)
-    app.use(checkRight)
+        app.use(ctxLog)
+        app.use(requestId)
 
-    app.use(async (ctx, next) => {
-        ctx.rq = rq
-        await next()
-    })
+        // 解决跨域
+        app.use(async (ctx, next)=> {
+            ctx.set('Access-Control-Allow-Origin', '*')
+            ctx.set('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With , yourHeaderFeild')
+            ctx.set('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')
+            // ctx.set('Access-Control-Allow-Credentials', 'true')
+            // 预请求直接响应
+            if(ctx.request.method === 'OPTIONS'){
+                ctx.body = 200
+                return
+            }
+            await next()
+        })
 
-    // app.use(bodyParser())
-    app.use(koaBody({ multipart: true, urlencoded: true }))
-    app.use(router.routes())
+        app.use(KoaStatic(path.join(__dirname, './static')))
 
-    app.listen(config.port)
-    console.log(`server start success... listen ${config.port}`)
+        // 校验登录
+        app.use(checkLogin)
+        app.use(checkRight)
+
+        app.use(async (ctx, next) => {
+            ctx.rq = rq
+            await next()
+        })
+
+        // app.use(bodyParser())
+        app.use(koaBody({ multipart: true, urlencoded: true }))
+        app.use(router.routes())
+
+        app.listen(config.port)
+        logger.log(`server start success... listen ${config.port}`)
+    } catch {
+        // 导致进程退出的错误
+        logger.log('process exit err:' + err.message, 'error')
+        process.exit(1)
+    }
 }

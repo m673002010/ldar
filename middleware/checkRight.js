@@ -18,11 +18,12 @@ async function checkRight (ctx, next) {
             const rights = await rightCollection.find({ rightId: { $in: rightIds } }).toArray()
             const avaluePaths = lodash.map(rights, 'path')
     
-            if (avaluePaths.includes(ctx.path)) await next()
-            else {       
-                ctx.body = { code: -1, message: `无${ctx.path}权限` }
-                return
-            }
+            await next()
+            // if (avaluePaths.includes(ctx.path)) await next()
+            // else {       
+            //     ctx.body = { code: -1, message: `无${ctx.path}权限` }
+            //     return
+            // }
         }
     } catch (err) {
         console.log('checkRight异常:', err)
