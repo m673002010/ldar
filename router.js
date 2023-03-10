@@ -34,6 +34,13 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 组件类型
+const componentTypeController = require('./controller/componentTypeController')
+router.get('/componentType/queryComponentType', componentTypeController.queryComponentType)
+router.post('/componentType/addComponentType', componentTypeController.addComponentType)
+router.post('/componentType/editComponentType', componentTypeController.editComponentType)
+router.post('/componentType/deleteComponentType', componentTypeController.deleteComponentType)
+
 // 介质状态
 const MediumController = require('./controller/mediumController')
 router.get('/medium/queryMedium', MediumController.queryMedium)

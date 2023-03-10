@@ -61,7 +61,7 @@ async function start () {
 
         app.listen(config.port)
         logger.log(`server start success... listen ${config.port}`)
-    } catch {
+    } catch (err) {
         // 导致进程退出的错误
         logger.log('process exit err:' + err.message, 'error')
         process.exit(1)
