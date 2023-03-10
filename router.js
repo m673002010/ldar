@@ -34,6 +34,13 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 计算类型
+const calculationTypeController = require('./controller/calculationTypeController')
+router.get('/calculationType/queryCalculationType', calculationTypeController.queryCalculationType)
+router.post('/calculationType/addCalculationType', calculationTypeController.addCalculationType)
+router.post('/calculationType/editCalculationType', calculationTypeController.editCalculationType)
+router.post('/calculationType/deleteCalculationType', calculationTypeController.deleteCalculationType)
+
 // 组件类型
 const componentTypeController = require('./controller/componentTypeController')
 router.get('/componentType/queryComponentType', componentTypeController.queryComponentType)
