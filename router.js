@@ -34,6 +34,13 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 装置类型
+const deviceTypeController = require('./controller/deviceTypeController')
+router.get('/deviceType/queryDeviceType', deviceTypeController.queryDeviceType)
+router.post('/deviceType/addDeviceType', deviceTypeController.addDeviceType)
+router.post('/deviceType/editDeviceType', deviceTypeController.editDeviceType)
+router.post('/deviceType/deleteDeviceType', deviceTypeController.deleteDeviceType)
+
 // 计算类型
 const calculationTypeController = require('./controller/calculationTypeController')
 router.get('/calculationType/queryCalculationType', calculationTypeController.queryCalculationType)
