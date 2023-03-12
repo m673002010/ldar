@@ -25,7 +25,7 @@ async function addInstrument (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const { serialNumber = '', testInstrument = '', finalPrecisionTime = '', invalidTime = '', responseTime = '' } = ctx.request.body
 
-        const data = { companyNum, serialNumber, testInstrument, finalPrecisionTime, responseTime, invalidTime }
+        const data = { companyNum, serialNumber, testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime, invalidTime: new Date(invalidTime) }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
 
         await instrumentCollection.insertOne(data)
@@ -44,7 +44,7 @@ async function editInstrument (ctx, next) {
 
         await instrumentCollection.updateOne({ companyNum, serialNumber }, { 
             $set: { 
-                testInstrument, finalPrecisionTime, responseTime, invalidTime, editDate: new Date(), editUser: username 
+                testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime, invalidTime: new Date(invalidTime), editDate: new Date(), editUser: username 
             } 
         })
         
