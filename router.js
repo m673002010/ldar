@@ -34,6 +34,13 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 仪器管理
+const instrumentController = require('./controller/instrumentController')
+router.get('/instrument/queryInstrument', instrumentController.queryInstrument)
+router.post('/instrument/addInstrument', instrumentController.addInstrument)
+router.post('/instrument/editInstrument', instrumentController.editInstrument)
+router.post('/instrument/deleteInstrument', instrumentController.deleteInstrument)
+
 // 装置类型
 const deviceTypeController = require('./controller/deviceTypeController')
 router.get('/deviceType/queryDeviceType', deviceTypeController.queryDeviceType)
