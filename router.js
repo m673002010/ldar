@@ -41,6 +41,13 @@ router.post('/instrument/addInstrument', instrumentController.addInstrument)
 router.post('/instrument/editInstrument', instrumentController.editInstrument)
 router.post('/instrument/deleteInstrument', instrumentController.deleteInstrument)
 
+// 标气管理
+const standardGasController = require('./controller/standardGasController')
+router.get('/standardGas/queryStandardGas', standardGasController.queryStandardGas)
+router.post('/standardGas/addStandardGas', standardGasController.addStandardGas)
+router.post('/standardGas/editStandardGas', standardGasController.editStandardGas)
+router.post('/standardGas/deleteStandardGas', standardGasController.deleteStandardGas)
+
 // 装置类型
 const deviceTypeController = require('./controller/deviceTypeController')
 router.get('/deviceType/queryDeviceType', deviceTypeController.queryDeviceType)
