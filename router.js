@@ -48,6 +48,13 @@ router.post('/standardGas/addStandardGas', standardGasController.addStandardGas)
 router.post('/standardGas/editStandardGas', standardGasController.editStandardGas)
 router.post('/standardGas/deleteStandardGas', standardGasController.deleteStandardGas)
 
+// 气象参数
+const meteorologyParamController = require('./controller/meteorologyParamController')
+router.post('/meteorologyParam/queryMeteorologyParam', meteorologyParamController.queryMeteorologyParam)
+router.post('/meteorologyParam/addMeteorologyParam', meteorologyParamController.addMeteorologyParam)
+router.post('/meteorologyParam/editMeteorologyParam', meteorologyParamController.editMeteorologyParam)
+router.post('/meteorologyParam/deleteMeteorologyParam', meteorologyParamController.deleteMeteorologyParam)
+
 // 装置类型
 const deviceTypeController = require('./controller/deviceTypeController')
 router.get('/deviceType/queryDeviceType', deviceTypeController.queryDeviceType)
