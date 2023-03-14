@@ -48,6 +48,12 @@ router.post('/standardGas/addStandardGas', standardGasController.addStandardGas)
 router.post('/standardGas/editStandardGas', standardGasController.editStandardGas)
 router.post('/standardGas/deleteStandardGas', standardGasController.deleteStandardGas)
 
+// 校准管理
+const calibrationController = require('./controller/calibrationController')
+router.post('/calibration/queryCalibration', calibrationController.queryCalibration)
+router.post('/calibration/importCalibration', calibrationController.importCalibration)
+router.post('/calibration/deleteCalibration', calibrationController.deleteCalibration)
+
 // 气象参数
 const meteorologyParamController = require('./controller/meteorologyParamController')
 router.post('/meteorologyParam/queryMeteorologyParam', meteorologyParamController.queryMeteorologyParam)
