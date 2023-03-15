@@ -48,6 +48,13 @@ router.post('/area/addArea', areaController.addArea)
 router.post('/area/editArea', areaController.editArea)
 router.post('/area/deleteArea', areaController.deleteArea)
 
+// 设备管理
+const equipmentController = require('./controller/equipmentController')
+router.get('/equipment/queryEquipment', equipmentController.queryEquipment)
+router.post('/equipment/addEquipment', equipmentController.addEquipment)
+router.post('/equipment/editEquipment', equipmentController.editEquipment)
+router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
+
 // 仪器管理
 const instrumentController = require('./controller/instrumentController')
 router.get('/instrument/queryInstrument', instrumentController.queryInstrument)
