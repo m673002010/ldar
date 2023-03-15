@@ -41,6 +41,13 @@ router.post('/device/addDevice', deviceController.addDevice)
 router.post('/device/editDevice', deviceController.editDevice)
 router.post('/device/deleteDevice', deviceController.deleteDevice)
 
+// 区域管理
+const areaController = require('./controller/areaController')
+router.get('/area/queryArea', areaController.queryArea)
+router.post('/area/addArea', areaController.addArea)
+router.post('/area/editArea', areaController.editArea)
+router.post('/area/deleteArea', areaController.deleteArea)
+
 // 仪器管理
 const instrumentController = require('./controller/instrumentController')
 router.get('/instrument/queryInstrument', instrumentController.queryInstrument)
