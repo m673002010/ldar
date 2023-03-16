@@ -1,6 +1,7 @@
 const userCollection = require('../db/user')
 const roleCollection = require('../db/role')
 const rightCollection = require('../db/right')
+const companyCollection = require('../db/company')
 const rightService = require('../service/rightService')
 const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
@@ -64,8 +65,10 @@ async function login (ctx, next) {
         const md5Password = md5.update(password).digest('hex')
         if (user.password !== md5Password) return { code: -1 , message: '密码错误' }
 
+        const company = await companyCollection.findOne({ companyNum: user.companyNum })
+
         // 签发 token，1天有效期
-        const userInfo = { username, userId: user.userId, companyNum: user.companyNum }
+        const userInfo = { username, userId: user.userId, companyNum: user.companyNum, shortName: company.shortName }
         const token = jwt.sign(userInfo, config.privateKey, { expiresIn: '1d' }) 
         return { code: 0 , message: '登陆成功', data: { token } }
 

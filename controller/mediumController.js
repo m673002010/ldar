@@ -56,8 +56,6 @@ async function deleteMedium (ctx, next) {
         const { deleteData } = ctx.request.body
         const mediumNumArr = lodash.map(deleteData, 'mediumNum')
 
-        console.log(companyNum, mediumNumArr)
-
         await mediumCollection.deleteMany({ companyNum, mediumNum: { $in: mediumNumArr } })
         
         ctx.body = { code: 0 , message: '删除介质成功' }

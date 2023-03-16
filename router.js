@@ -34,6 +34,12 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 上传图片台账
+const pictureLedgerController = require('./controller/pictureLedgerController')
+router.get('/pictureLedger/queryPicture', pictureLedgerController.queryPicture)
+router.post('/pictureLedger/uploadPicture', pictureLedgerController.uploadPicture)
+router.post('/pictureLedger/deletePicture', pictureLedgerController.deletePicture)
+
 // 装置管理
 const deviceController = require('./controller/deviceController')
 router.get('/device/queryDevice', deviceController.queryDevice)

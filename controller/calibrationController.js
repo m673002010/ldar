@@ -29,8 +29,6 @@ async function importCalibration (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { importData = [] } = ctx.request.body
-
-        console.log()
         
         const data = importData.map(item => { 
             Object.assign(item, { companyNum })

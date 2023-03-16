@@ -63,11 +63,9 @@ async function deleteMeteorologyParam (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const meteorologyParamNumArr = lodash.map(deleteData, 'meteorologyParamNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        console.log(companyNum, meteorologyParamNumArr)
-
-        await meteorologyParamCollection.deleteMany({ companyNum, meteorologyParamNum: { $in: meteorologyParamNumArr } })
+        await meteorologyParamCollection.deleteMany({ companyNum, _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除气象参数成功' }
     } catch (err) {
