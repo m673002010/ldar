@@ -50,8 +50,18 @@ async function deletePicture (ctx, next) {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
         const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
+        const picturePathArr = lodash.map(deleteData, 'picturePath')
 
         await pictureLedgerCollection.deleteMany({ companyNum, _id: { $in: _idArr } })
+
+        for (const picturePath of picturePathArr){
+            fs.unlink(`${path.join(__dirname, `../static${picturePath}`)}`, function (error) {
+                if(error){
+                    logger.log('删除图片失败:' + error, "error")
+                }
+                logger.log('删除图片成功')
+            })
+        }
         
         ctx.body = { code: 0 , message: '删除图片成功' }
     } catch (err) {
