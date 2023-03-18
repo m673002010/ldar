@@ -34,6 +34,14 @@ router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 
+// 组件管理
+const componentController = require('./controller/componentController')
+router.get('/component/queryComponent', componentController.queryComponent)
+router.get('/component/queryImportRecord', componentController.queryImportRecord)
+router.post('/component/importComponent', componentController.importComponent)
+router.post('/component/editComponent', componentController.editComponent)
+router.post('/component/deleteComponent', componentController.deleteComponent)
+
 // 上传图片台账
 const pictureLedgerController = require('./controller/pictureLedgerController')
 router.get('/pictureLedger/queryPicture', pictureLedgerController.queryPicture)
