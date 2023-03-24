@@ -69,6 +69,10 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
+// 泄露区间分布
+const leakIntervalController = require('./controller/leakIntervalController')
+router.get('/leakInterval/queryLeakInterval', leakIntervalController.queryLeakInterval)
+
 // 仪器管理
 const instrumentController = require('./controller/instrumentController')
 router.get('/instrument/queryInstrument', instrumentController.queryInstrument)
