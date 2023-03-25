@@ -69,6 +69,10 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
+// 组件类型排放分析
+const cteaController = require('./controller/cteaController')
+router.get('/ctea/componentTypeEmissionAnalysis', cteaController.componentTypeEmissionAnalysis)
+
 // 泄露区间分布
 const leakIntervalController = require('./controller/leakIntervalController')
 router.get('/leakInterval/queryLeakInterval', leakIntervalController.queryLeakInterval)
