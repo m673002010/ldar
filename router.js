@@ -69,6 +69,10 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
+// 历史检测统计
+const hdsController = require('./controller/hdsController')
+router.get('/hds/historyDetectionStatistics', hdsController.historyDetectionStatistics)
+
 // 组件类型排放分析
 const cteaController = require('./controller/cteaController')
 router.get('/ctea/componentTypeEmissionAnalysis', cteaController.componentTypeEmissionAnalysis)
