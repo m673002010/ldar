@@ -69,6 +69,10 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
+// 排放量计算报告
+const ecrController = require('./controller/ecrController')
+router.get('/ecr/emissionCalculationReport', ecrController.emissionCalculationReport)
+
 // 仪器校准记录单
 const icrController = require('./controller/icrController')
 router.get('/icr/instrumentCalibrationRecord', icrController.instrumentCalibrationRecord)
