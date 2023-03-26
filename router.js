@@ -69,6 +69,14 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
+// 泄露信息台账
+const leakInfoLedgerController = require('./controller/leakInfoLedgerController')
+router.get('/leakInfoLedger/queryLeakInfoLedger', leakInfoLedgerController.queryLeakInfoLedger)
+
+// 历史排放统计
+const hesController = require('./controller/hesController')
+router.get('/hes/historyEmissionStatistics', hesController.historyEmissionStatistics)
+
 // 排放量计算报告
 const ecrController = require('./controller/ecrController')
 router.get('/ecr/emissionCalculationReport', ecrController.emissionCalculationReport)
