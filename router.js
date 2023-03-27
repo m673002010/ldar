@@ -69,6 +69,14 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
+// 组件信息台账
+const cilController = require('./controller/cilController')
+router.get('/cil/componentInfoLedger', cilController.componentInfoLedger)
+
+// 组件图片台账
+const cplController = require('./controller/cplController')
+router.get('/cpl/componentPictureLedger', cplController.componentPictureLedger)
+
 // 泄露信息台账
 const leakInfoLedgerController = require('./controller/leakInfoLedgerController')
 router.get('/leakInfoLedger/queryLeakInfoLedger', leakInfoLedgerController.queryLeakInfoLedger)
