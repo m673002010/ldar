@@ -73,6 +73,10 @@ router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 const cilController = require('./controller/cilController')
 router.get('/cil/componentInfoLedger', cilController.componentInfoLedger)
 
+// 检测数据台账
+const ddlController = require('./controller/ddlController')
+router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
+
 // 组件图片台账
 const cplController = require('./controller/cplController')
 router.get('/cpl/componentPictureLedger', cplController.componentPictureLedger)
