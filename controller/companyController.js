@@ -30,15 +30,44 @@ async function searchCompany (ctx, next) {
 
 async function dataPanel (ctx, next) {
     try {
-        return { code: 0 , message: '数据面板展示成功', data: [] }
+        ctx.body =  { code: 0 , message: '数据面板展示成功', data: [] }
     } catch (err) {
         logger.log('dataPanel异常:' + err, 'error')
-        return { code: -1 , message: '数据面板展示失败' }
+        ctx.body =  { code: -1 , message: '数据面板展示失败' }
+    }
+}
+
+async function bindRegulation (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const { regulationCode, regulation, unreachableCalculation } = ctx.request.body
+
+        await companyCollection.updateOne({ companyNum }, { $set: { regulationCode, regulation, unreachableCalculation, editDate: new Date(), editUser: username } })
+
+        ctx.body =  { code: 0 , message: '绑定法规成功' }
+    } catch (err) {
+        logger.log('bindRegulation异常:' + err, 'error')
+        ctx.body =  { code: -1 , message: '绑定法规失败' }
+    }
+}
+
+async function getBindRegulation (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+
+        const data = await companyCollection.findOne({ companyNum })
+
+        ctx.body =  { code: 0 , message: '查询绑定法规成功', data }
+    } catch (err) {
+        logger.log('getBindRegulation异常:' + err, 'error')
+        ctx.body =  { code: -1 , message: '查询绑定法规失败' }
     }
 }
 
 module.exports = {
     companyInfo,
     searchCompany,
-    dataPanel
+    dataPanel,
+    bindRegulation,
+    getBindRegulation
 }

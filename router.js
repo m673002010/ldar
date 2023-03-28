@@ -33,6 +33,8 @@ const companyController = require('./controller/companyController')
 router.get('/company/companyInfo', companyController.companyInfo)
 router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
+router.get('/company/getBindRegulation', companyController.getBindRegulation)
+router.post('/company/bindRegulation', companyController.bindRegulation)
 
 // 组件管理
 const componentController = require('./controller/componentController')
@@ -72,6 +74,13 @@ router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 // 组件信息台账
 const cilController = require('./controller/cilController')
 router.get('/cil/componentInfoLedger', cilController.componentInfoLedger)
+
+// 法规管理
+const regulationController = require('./controller/regulationController')
+router.get('/regulation/queryRegulation', regulationController.queryRegulation)
+router.post('/regulation/addRegulation', regulationController.addRegulation)
+router.post('/regulation/editRegulation', regulationController.editRegulation)
+router.post('/regulation/deleteRegulation', regulationController.deleteRegulation)
 
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
