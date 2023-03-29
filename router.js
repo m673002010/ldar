@@ -82,6 +82,11 @@ router.post('/regulation/addRegulation', regulationController.addRegulation)
 router.post('/regulation/editRegulation', regulationController.editRegulation)
 router.post('/regulation/deleteRegulation', regulationController.deleteRegulation)
 
+router.get('/regulation/getRegulationComponent', regulationController.getRegulationComponent)
+router.post('/regulation/addRegulationComponent', regulationController.addRegulationComponent)
+router.post('/regulation/editRegulationComponent', regulationController.editRegulationComponent)
+router.post('/regulation/deleteRegulationComponent', regulationController.deleteRegulationComponent)
+
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)

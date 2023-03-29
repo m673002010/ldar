@@ -1,5 +1,7 @@
 const regulationCollection = require('../db/regulation.js')
+const regulationComponentCollection = require('../db/regulationComponent.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryRegulation (ctx, next) {
     try {
@@ -59,9 +61,82 @@ async function deleteRegulation (ctx, next) {
     }
 }
 
+async function getRegulationComponent (ctx, next) {
+    try {
+        const { regulationCode = '' } = ctx.request.query
+
+        const data = await regulationComponentCollection.find({ regulationCode }).toArray()
+        
+        ctx.body = { code: 0 , message: '获取法规组件成功', data }
+    } catch (err) {
+        logger.log('getRegulationComponent异常:' + err, "error")
+        ctx.body = { code: -1 , message: '获取法规组件失败' }
+    }
+}
+
+async function addRegulationComponent (ctx, next) {
+    try {
+        const { username } = ctx.userInfo
+        const { regulationCode = '', detailNum = '', componentType = '', mediumStatus = '', quarter = '', threshold } = ctx.request.body
+
+        const data = { regulationCode, detailNum, componentType, mediumStatus, quarter, threshold }
+        Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
+
+        await regulationComponentCollection.insertOne(data)
+        
+        ctx.body = { code: 0 , message: '添加法规组件成功' }
+    } catch (err) {
+        logger.log('addRegulationComponent异常:' + err, "error")
+        ctx.body = { code: -1 , message: '添加法规组件失败' }
+    }
+}
+
+async function editRegulationComponent (ctx, next) {
+    try {
+        const { username } = ctx.userInfo
+        const { regulationCode = '', detailNum = '', componentType = '', mediumStatus = '', quarter = '', threshold = '' } = ctx.request.body
+
+        await regulationComponentCollection.updateOne({ regulationCode }, { 
+            $set: {
+                detailNum,
+                componentType, 
+                mediumStatus,
+                quarter,
+                threshold,
+                editDate: new Date(),
+                editUser: username 
+            } 
+        })
+        
+        ctx.body = { code: 0 , message: '编辑法规组件成功' }
+    } catch (err) {
+        logger.log('editRegulationComponent异常:' + err, "error")
+        ctx.body = { code: -1 , message: '编辑法规组件失败' }
+    }
+}
+
+async function deleteRegulationComponent (ctx, next) {
+    try {
+        const { deleteData } = ctx.request.body
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
+
+        await regulationComponentCollection.deleteMany({ _id: { $in: _idArr } })
+        
+        ctx.body = { code: 0 , message: '删除法规组件成功' }
+    } catch (err) {
+        logger.log('deleteRegulationComponent异常:' + err, "error")
+        ctx.body = { code: -1 , message: '删除法规组件失败' }
+    }
+}
+
 module.exports = {
     queryRegulation,
     addRegulation,
     editRegulation,
-    deleteRegulation
+    deleteRegulation,
+
+    getRegulationComponent,
+    addRegulationComponent,
+    editRegulationComponent,
+    deleteRegulationComponent,
 }
