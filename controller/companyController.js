@@ -2,29 +2,23 @@ const companyCollection = require('../db/company')
 
 async function companyInfo (ctx, next) {
     try {
-        const companys = await companyCollection.find().toArray()
-        
+        const { companyNum: userCompanyNum } = ctx.userInfo
+        const { companyNum = '', shortName = '' } = ctx.request.query
+
+        const query = {}
+        if (userCompanyNum === 'all') { // 标识为all可以查询所有公司
+            if (companyNum) query.companyNum = companyNum
+            if (shortName) query.shortName = shortName
+        } else {
+            query.companyNum = userCompanyNum // 只可以查询本公司
+        }
+
+        const companys = await companyCollection.find(query).toArray()
+
         ctx.body = { code: 0 , message: '获取公司信息成功', data: companys }
     } catch (err) {
         logger.log('companyInfo异常:' + err, 'error')
         ctx.body = { code: -1 , message: '获取公司信息失败' }
-    }
-}
-
-async function searchCompany (ctx, next) {
-    try {
-        const { companyNum = '', shortName = '' } = ctx.request.query
-        const query = {}
-
-        if (companyNum) query.companyNum = companyNum
-        if (shortName) query.shortName = shortName
-        
-        const companys = await companyCollection.find(query).toArray()
-        
-        ctx.body =  { code: 0 , message: '搜索公司信息成功', data: companys }
-    } catch (err) {
-        logger.log('companyInfo异常:' + err, 'error')
-        ctx.body =  { code: -1 , message: '搜索公司信息失败' }
     }
 }
 
@@ -66,7 +60,6 @@ async function getBindRegulation (ctx, next) {
 
 module.exports = {
     companyInfo,
-    searchCompany,
     dataPanel,
     bindRegulation,
     getBindRegulation

@@ -129,6 +129,14 @@ async function deleteRegulationComponent (ctx, next) {
     }
 }
 
+async function validate (ctx, next) {
+    try {
+    } catch (err) {
+        logger.log('validate异常:' + err, "error")
+        ctx.body = { code: -1 , message: '验证法规组件失败' }
+    }
+}
+
 module.exports = {
     queryRegulation,
     addRegulation,
@@ -139,4 +147,6 @@ module.exports = {
     addRegulationComponent,
     editRegulationComponent,
     deleteRegulationComponent,
+
+    validate
 }

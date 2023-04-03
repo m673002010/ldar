@@ -28,6 +28,16 @@ async function login (ctx, next) {
     ctx.body = await userService.login(ctx, next)
 }
 
+async function reToken (ctx, next) {
+    const { companyNum = '' } = ctx.request.body
+    if (!companyNum) {
+        ctx.body = { code: -1, message: '缺少公司参数' }
+        return
+    }
+
+    ctx.body = await userService.reToken(ctx, next)
+}
+
 async function getUsers (ctx, next) {
     ctx.body = await userService.getUsers(ctx, next)
 }
@@ -83,6 +93,7 @@ async function userInfo (ctx, next) {
 module.exports = {
     register,
     login,
+    reToken,
     getUsers,
     addUser,
     updateUser,

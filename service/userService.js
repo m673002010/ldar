@@ -65,14 +65,26 @@ async function login (ctx, next) {
         const md5Password = md5.update(password).digest('hex')
         if (user.password !== md5Password) return { code: -1 , message: '密码错误' }
 
-        const company = await companyCollection.findOne({ companyNum: user.companyNum })
-
         // 签发 token，1天有效期
-        const userInfo = { username, userId: user.userId, companyNum: user.companyNum, shortName: company.shortName }
+        const userInfo = { username, userId: user.userId, companyNum: user.companyNum }
         const token = jwt.sign(userInfo, config.privateKey, { expiresIn: '1d' }) 
         return { code: 0 , message: '登陆成功', data: { token } }
 
     } else return { code: -1 , message: '无此帐号' }
+}
+
+async function reToken (ctx, next) {
+    const { companyNum, shortName } = ctx.request.body
+    const { username } = ctx.userInfo
+
+    const user = await userCollection.findOne({ username })
+    if (user) {
+        // 根据选择的公司签发 token，1天有效期
+        const userInfo = { username, userId: user.userId, companyNum, shortName }
+        const token = jwt.sign(userInfo, config.privateKey, { expiresIn: '1d' }) 
+        return { code: 0 , message: '派发token成功', data: { token } }
+
+    } else return { code: -1 , message: '派发token失败' }
 }
 
 async function getUsers (ctx, next) {
@@ -189,6 +201,7 @@ module.exports = {
     createFirstAccount,
     register,
     login,
+    reToken,
     getUsers,
     addUser,
     updateUser,

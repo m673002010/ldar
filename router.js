@@ -5,6 +5,7 @@ const router = new koaRouter()
 const userController = require('./controller/userController')
 router.post('/user/register', userController.register)
 router.post('/user/login', userController.login)
+router.post('/user/reToken', userController.reToken)
 router.get('/user/getUsers', userController.getUsers)
 router.post('/user/addUser', userController.addUser)
 router.post('/user/updateUser', userController.updateUser)
@@ -31,7 +32,6 @@ router.get('/right/deleteRight', rightController.deleteRight)
 // 公司
 const companyController = require('./controller/companyController')
 router.get('/company/companyInfo', companyController.companyInfo)
-router.get('/company/searchCompany', companyController.searchCompany)
 router.get('/company/dataPanel', companyController.dataPanel)
 router.get('/company/getBindRegulation', companyController.getBindRegulation)
 router.post('/company/bindRegulation', companyController.bindRegulation)
@@ -86,6 +86,8 @@ router.get('/regulation/getRegulationComponent', regulationController.getRegulat
 router.post('/regulation/addRegulationComponent', regulationController.addRegulationComponent)
 router.post('/regulation/editRegulationComponent', regulationController.editRegulationComponent)
 router.post('/regulation/deleteRegulationComponent', regulationController.deleteRegulationComponent)
+
+router.post('/regulation/validate', regulationController.validate)
 
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
