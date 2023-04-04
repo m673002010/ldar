@@ -74,6 +74,7 @@ router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 // 组件信息台账
 const cilController = require('./controller/cilController')
 router.get('/cil/componentInfoLedger', cilController.componentInfoLedger)
+router.get('/cil/exportComponentInfoLedger', cilController.exportComponentInfoLedger)
 
 // 法规管理
 const regulationController = require('./controller/regulationController')

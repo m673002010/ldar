@@ -4,6 +4,7 @@
     componentTypeNum: String,
     componentType: String,
     calculationType: String,
+    sealPointType: String,
     createDate: Date,
     createUser: String,
     editDate: Date,

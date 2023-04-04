@@ -4,12 +4,13 @@ const lodash = require('lodash')
 async function queryComponentType (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { componentTypeNum = '', componentType = '', calculationType = '' } = ctx.request.query
+        const { componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.query
         const query = {}
         if (companyNum) query.companyNum = companyNum
         if (componentTypeNum) query.componentTypeNum = componentTypeNum
         if (componentType) query.componentType = componentType
         if (calculationType) query.calculationType = calculationType
+        if (sealPointType) query.sealPointType = sealPointType
 
         const data = await componentTypeCollection.find(query).toArray()
         
@@ -23,9 +24,9 @@ async function queryComponentType (ctx, next) {
 async function addComponentType (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { componentTypeNum = '', componentType = '', calculationType = '' } = ctx.request.body
+        const { componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.body
 
-        const data = { companyNum, componentTypeNum, componentType, calculationType }
+        const data = { companyNum, componentTypeNum, componentType, calculationType, sealPointType }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await componentTypeCollection.insertOne(data)
@@ -40,9 +41,9 @@ async function addComponentType (ctx, next) {
 async function editComponentType (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { componentTypeNum = '', componentType = '', calculationType = '' } = ctx.request.body
+        const { componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.body
 
-        await componentTypeCollection.updateOne({ companyNum, componentTypeNum }, { $set: { componentType, calculationType, editDate: new Date(), editUser: username } })
+        await componentTypeCollection.updateOne({ companyNum, componentTypeNum }, { $set: { componentType, calculationType, sealPointType, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑组件类型成功' }
     } catch (err) {
