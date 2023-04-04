@@ -56,7 +56,12 @@ async function start () {
         })
 
         // app.use(bodyParser())
-        app.use(koaBody({ multipart: true, urlencoded: true }))
+        app.use(koaBody({ 
+            multipart: true, 
+            urlencoded: true,
+            formLimit:"10mb",
+            jsonLimit:"10mb"
+        }))
         app.use(router.routes())
 
         app.listen(config.port)

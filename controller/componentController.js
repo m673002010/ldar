@@ -24,7 +24,7 @@ async function importComponent (ctx, next) {
 async function queryComponent (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { device = '', area = '', equipment = '' } = ctx.request.query
+        const { device = '', area = '', equipment = '', currentPage = 1, pageSize = 10 } = ctx.request.query
 
         const query = {}
         if (companyNum) query.companyNum = companyNum
@@ -32,9 +32,10 @@ async function queryComponent (ctx, next) {
         if (area) query.area = area
         if (equipment) query.equipment = equipment
 
-        const data = await componentCollection.find(query).toArray()
+        const componentData = await componentCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
+        const total = await componentCollection.find(query).count()
         
-        ctx.body = { code: 0 , message: '查询组件成功', data }
+        ctx.body = { code: 0 , message: '查询组件成功', data: { componentData, total } }
     } catch (err) {
         logger.log('queryComponent异常:' + err, "error")
         ctx.body = { code: -1 , message: '查询组件失败' }

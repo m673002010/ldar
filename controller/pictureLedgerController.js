@@ -33,7 +33,7 @@ async function uploadPicture (ctx, next) {
         const pictureRecord = await pictureLedgerCollection.findOne({ picture: file.originalFilename })
 
         if (!pictureRecord) {
-            const data = { companyNum, picture: file.originalFilename, picturePath: `/pictureLedger/${file.originalFilename}` }
+            const data = { companyNum, label: file.originalFilename.split('.')[0], picture: file.originalFilename, picturePath: `/pictureLedger/${file.originalFilename}` }
             Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
             await pictureLedgerCollection.insertOne(data)
         }
