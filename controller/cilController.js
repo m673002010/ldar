@@ -13,7 +13,7 @@ async function componentInfoLedger (ctx, next) {
             unreachable = '',
             componentType = '',
             sealPointType = '',
-            status = '',
+            mediumStatus = '',
             medium = '',
             currentPage = 1, 
             pageSize = 10 
@@ -27,7 +27,7 @@ async function componentInfoLedger (ctx, next) {
         if (label) query.label = label
         if (unreachable !== '2' && unreachable) query.unreachable = unreachable === '0' ? '否' : '是'
         if (componentType) query.componentType = componentType
-        if (status) query.status = status
+        if (mediumStatus) query.mediumStatus = mediumStatus
         if (medium) query.medium = medium
 
         // 根据动静密封筛选
@@ -59,7 +59,7 @@ async function exportComponentInfoLedger (ctx, next) {
             unreachable = '',
             componentType = '',
             sealPointType = '',
-            status = '',
+            mediumStatus = '',
             medium = '',
         } = ctx.request.query
 
@@ -71,7 +71,7 @@ async function exportComponentInfoLedger (ctx, next) {
         if (label) query.label = label
         if (unreachable !== '2' && unreachable) query.unreachable = unreachable === '0' ? '否' : '是'
         if (componentType) query.componentType = componentType
-        if (status) query.status = status
+        if (mediumStatus) query.mediumStatus = mediumStatus
         if (medium) query.medium = medium
 
         // 根据动静密封筛选

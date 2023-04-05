@@ -96,9 +96,8 @@ async function editRegulationComponent (ctx, next) {
         const { username } = ctx.userInfo
         const { regulationCode = '', detailNum = '', componentType = '', mediumStatus = '', quarter = '', threshold = '' } = ctx.request.body
 
-        await regulationComponentCollection.updateOne({ regulationCode }, { 
+        await regulationComponentCollection.updateOne({ regulationCode, detailNum }, { 
             $set: {
-                detailNum,
                 componentType, 
                 mediumStatus,
                 quarter,

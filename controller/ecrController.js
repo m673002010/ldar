@@ -8,7 +8,7 @@ async function emissionCalculationReport (ctx, next) {
                 area: '苯酚回收',
                 equipment: '',
                 componentType: '泵',
-                mediumStatus: '轻液',
+                status: '轻液',
                 count: '4',
                 leakRate: '0.000107372749',
             }

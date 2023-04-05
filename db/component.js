@@ -18,7 +18,7 @@
     unreachable: String,
     reason: String,
     medium: String,
-    status: String,
+    mediumStatus: String,
     quantity: String,
 }
  */
