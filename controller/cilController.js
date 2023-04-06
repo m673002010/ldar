@@ -1,5 +1,7 @@
 const componentCollection = require('../db/component')
 const componentTypeCollection = require('../db/componentType')
+const regulationComponentCollection = require('../db/regulationComponent')
+const company = require('../db/company')
 const lodash = require('lodash')
 
 async function componentInfoLedger (ctx, next) {
@@ -40,7 +42,21 @@ async function componentInfoLedger (ctx, next) {
         componentData = lodash.filter(componentData, c => { return componentTypeArr.includes(c.componentType) })
         const total = componentData.length
         componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
-        
+
+        // 补充法规和检测频率信息
+        const arr = []
+        const regulationCode = (await company.findOne({ companyNum })).regulationCode
+        const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
+        for (const c of componentData) {
+            for (const r of regulationComponentData) {
+                if (c.componentType === r.componentType && c.mediumStatus === r.mediumStatus) {
+                    Object.assign(c, { regulationCode: r.regulationCode, quarter: r.quarter })  
+                }
+            }
+            arr.push(c)
+        }
+        componentData = arr
+
         ctx.body = { code: 0 , message: '查询组件成功', data: { componentData, total } }
     } catch (err) {
         logger.log('componentInfoLedger异常:' + err, "error")
@@ -82,7 +98,21 @@ async function exportComponentInfoLedger (ctx, next) {
 
         let componentData = await componentCollection.find(query).toArray()
         componentData = lodash.filter(componentData, c => { return componentTypeArr.includes(c.componentType) })
-        
+
+        // 补充法规和检测频率信息
+        const arr = []
+        const regulationCode = (await company.findOne({ companyNum })).regulationCode
+        const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
+        for (const c of componentData) {
+            for (const r of regulationComponentData) {
+                if (c.componentType === r.componentType && c.mediumStatus === r.mediumStatus) {
+                    Object.assign(c, { regulationCode: r.regulationCode, quarter: r.quarter })  
+                }
+            }
+            arr.push(c)
+        }
+        componentData = arr
+
         ctx.body = { code: 0 , message: '查询组件成功', data: componentData }
     } catch (err) {
         logger.log('componentInfoLedger异常:' + err, "error")
