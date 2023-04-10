@@ -1,6 +1,7 @@
 /**
 {
     companyNum: String,
+    labelExpand: String,
     device: String, 
     area: String, 
     equipment: String, 

@@ -11,7 +11,12 @@ async function importComponent (ctx, next) {
         const fileData = { companyNum, importFile, username, newCount: importData.length, createDate: new Date(), createUser: username }
         await cirCollection.insertOne(fileData)
 
-        const data = importData.map(item => Object.assign(item, { companyNum }))
+        const data = importData.map(item => {
+            Object.assign(item, { companyNum })
+            item.labelExpend = item.label + '-' + item.expand
+
+            return item
+        })
         await componentCollection.insertMany(data)
 
         ctx.body = { code: 0 , message: '导入组件成功' }

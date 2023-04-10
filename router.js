@@ -90,6 +90,12 @@ router.post('/regulation/deleteRegulationComponent', regulationController.delete
 
 router.post('/regulation/validate', regulationController.validate)
 
+// 分配任务
+const assignmentController = require('./controller/assignmentController')
+router.get('/assignment/queryAssignment', assignmentController.queryAssignment)
+router.post('/assignment/addAssignment', assignmentController.addAssignment)
+router.post('/assignment/deleteAssignment', assignmentController.deleteAssignment)
+
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
