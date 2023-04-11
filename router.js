@@ -96,6 +96,9 @@ router.get('/assignment/queryAssignment', assignmentController.queryAssignment)
 router.post('/assignment/addAssignment', assignmentController.addAssignment)
 router.post('/assignment/deleteAssignment', assignmentController.deleteAssignment)
 
+router.get('/assignment/queryNoAssign', assignmentController.queryNoAssign)
+router.post('/assignment/assign', assignmentController.assign)
+
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)

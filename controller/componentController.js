@@ -13,7 +13,7 @@ async function importComponent (ctx, next) {
 
         const data = importData.map(item => {
             Object.assign(item, { companyNum })
-            item.labelExpend = item.label + '-' + item.expand
+            item.labelExpand = item.label + '-' + item.expand
 
             return item
         })

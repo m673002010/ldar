@@ -1,13 +1,19 @@
 const assignmentCollection = require('../db/assignment')
+const assignOrderCollection = require('../db/assignOrder')
 const componentCollection = require('../db/component')
 const componentTypeCollection = require('../db/componentType')
-const { ObjectId } = require('mongodb')
 const lodash = require('lodash')
 const quarterMap = {
     '第1季度': 'First-Ldar-Quarter',
     '第2季度': 'Second-Ldar-Quarter',
     '第3季度': 'Third-Ldar-Quarter',
     '第4季度': 'Fourth-Ldar-Quarter',
+}
+const dateMap = {
+    'First-Ldar-Quarter': { start: '01-01', end: '04-01'},
+    'Second-Ldar-Quarter': { start: '04-01', end:'07-01'},
+    'Third-Ldar-Quarter': { start: '07-01', end:'10-01'},
+    'Fourth-Ldar-Quarter': { start: '10-01', end:'01-01'},
 }
 
 async function queryAssignment (ctx, next) {
@@ -38,7 +44,8 @@ async function addAssignment (ctx, next) {
             quarter, 
             year, 
             detectType,
-            assigned: 0, 
+            assigned: 0,
+            noAssigned: 0,
             detected: 0,
             noDetected: 0,
             leakFix: 0,
@@ -86,8 +93,109 @@ async function deleteAssignment (ctx, next) {
     }
 }
 
+async function queryNoAssign (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+        const { 
+            quarterCode = '', 
+            device = '', 
+            area = '', 
+            equipment = '', 
+            sealPointType = '',
+            unreachable = '',
+            currentPage = 1,
+            pageSize = 10
+        } = ctx.request.query
+
+        // 已分配的数量
+        const assignedCount = (await assignmentCollection.findOne({ companyNum, quarterCode })).assigned
+        // 根据动静密封筛选
+        const q = {}
+        if (sealPointType) q.sealPointType = sealPointType
+        let componentTypes = await componentTypeCollection.find(q).toArray()
+        componentTypeArr = lodash.map(componentTypes, 'componentType')
+
+        // 未分配的数据
+        let componentData = await componentCollection.find().skip(+assignedCount).toArray()
+
+        // 多次筛选
+        componentData = lodash.filter(componentData, c => { return componentTypeArr.includes(c.componentType) })
+        if(device) componentData = lodash.filter(componentData, c => { return c.device === device })
+        if(area) componentData = lodash.filter(componentData, c => { return c.area === area })
+        if(equipment) componentData = lodash.filter(componentData, c => { return c.equipment === equipment })
+        if(unreachable) componentData = lodash.filter(componentData, c => { return c.unreachable === unreachable })
+
+        // 位置描述拼接
+        componentData = componentData.map(item => { 
+            item.location = `${item.equipment} ${item.location} ${item.distance}米 ${item.floor}楼 ${item.high}米`
+            return item
+        })
+
+        const total = componentData.length
+        componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
+
+        ctx.body = { code: 0 , message: '未分配查询成功', data: { componentData, total } }
+    } catch (err) {
+        logger.log('queryNoAssign异常:' + err, "error")
+        ctx.body = { code: -1 , message: '未分配查询失败' }
+    }
+}
+
+async function assign (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const { quarterCode = '', assignNum = '', employee = '', assignPoint = '' } = ctx.request.body
+
+        // 已分配的数量
+        const assignedCount = (await assignmentCollection.findOne({ companyNum, quarterCode })).assigned
+        // console.log("assign assignedCount", assignedCount)
+
+        // 要分配的数据
+        let componentData = await componentCollection.find().skip(+assignedCount).toArray()
+        componentData = componentData.slice(0, assignPoint)
+
+        // 记录 标签号 + 扩展号
+        const labelExpandArr = []
+        for (const c of componentData) {
+            labelExpandArr.push(c.labelExpand)
+        }
+
+        const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
+
+        // 新增任务
+        const data = {
+            companyNum,
+            quarterCode, 
+            assignNum, 
+            employee, 
+            assignPoint: +assignPoint, 
+            labelExpandArr, 
+            detected: 0, 
+            noDetected: 0, 
+            leakFix: 0, 
+            isFinished: '否',
+            startDate: dateMap[quarterStr].start,
+            endDate: dateMap[quarterStr].end,
+            createDate: new Date(),
+            createUser: username
+        }
+
+        await assignOrderCollection.insertOne(data)
+
+        // 更新
+        await assignmentCollection.updateOne({ quarterCode }, { $inc: { assigned: +assignPoint })
+
+        ctx.body = { code: 0 , message: '分配任务成功' }
+    } catch (err) {
+        logger.log('assign异常:' + err, "error")
+        ctx.body = { code: -1 , message: '分配任务失败' }
+    }
+}
+
 module.exports = {
     queryAssignment,
     addAssignment,
-    deleteAssignment
+    deleteAssignment,
+    queryNoAssign,
+    assign,
 }
