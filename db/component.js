@@ -8,6 +8,7 @@
     label: String, 
     expand: String,
     componentType: String,
+    sealPointType: String,
     pid: String,
     reference: String,
     location: String,

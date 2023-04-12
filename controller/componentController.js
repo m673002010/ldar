@@ -1,4 +1,5 @@
 const componentCollection = require('../db/component')
+const componentTypeCollection = require('../db/componentType')
 const cirCollection = require('../db/componentImportRecord')
 const { ObjectId } = require('mongodb')
 const lodash = require('lodash')
@@ -11,9 +12,17 @@ async function importComponent (ctx, next) {
         const fileData = { companyNum, importFile, username, newCount: importData.length, createDate: new Date(), createUser: username }
         await cirCollection.insertOne(fileData)
 
+        // 组件表补充密封点类型字段
+        const sealPointTypeMap = {}
+        const componentTypeArr = await componentTypeCollection.find().toArray()
+        for (const c of componentTypeArr) {
+            sealPointTypeMap[c.componentType] = c.sealPointType
+        }
+
         const data = importData.map(item => {
             Object.assign(item, { companyNum })
             item.labelExpand = item.label + '-' + item.expand
+            item.sealPointType = sealPointTypeMap[item.componentType]
 
             return item
         })

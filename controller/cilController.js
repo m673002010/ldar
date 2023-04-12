@@ -27,19 +27,13 @@ async function componentInfoLedger (ctx, next) {
         if (area) query.area = area
         if (equipment) query.equipment = equipment
         if (label) query.label = label
-        if (unreachable !== '2' && unreachable) query.unreachable = unreachable === '0' ? '否' : '是'
+        if (unreachable) query.unreachable = unreachable
         if (componentType) query.componentType = componentType
         if (mediumStatus) query.mediumStatus = mediumStatus
         if (medium) query.medium = medium
-
-        // 根据动静密封筛选
-        const q = {}
-        if (sealPointType) q.sealPointType = sealPointType
-        let componentTypes = await componentTypeCollection.find(q).toArray()
-        componentTypeArr = lodash.map(componentTypes, 'componentType')
+        if (sealPointType) query.sealPointType = sealPointType
 
         let componentData = await componentCollection.find(query).toArray()
-        componentData = lodash.filter(componentData, c => { return componentTypeArr.includes(c.componentType) })
         const total = componentData.length
         componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
 

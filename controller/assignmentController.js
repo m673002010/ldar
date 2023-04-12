@@ -38,9 +38,12 @@ async function addAssignment (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const { year = '', quarter = '', detectType } = ctx.request.body
 
+        const quarterCode = year + '-' + quarterMap[quarter]
+        const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
+
         const data = {
             companyNum,
-            quarterCode: year + '-' + quarterMap[quarter],
+            quarterCode,
             quarter, 
             year, 
             detectType,
@@ -50,8 +53,8 @@ async function addAssignment (ctx, next) {
             noDetected: 0,
             leakFix: 0,
             totalPoint: 0,
-            startDate: '2023-01-01',
-            endDate: '2023-04-01',
+            startDate: year + '-' + dateMap[quarterStr].start,
+            endDate: year + '-' + dateMap[quarterStr].end,
             createDate: new Date(),
             createUser: username,
         }
@@ -85,11 +88,12 @@ async function deleteAssignment (ctx, next) {
         const quarterCodeArr = lodash.map(deleteData, 'quarterCode')
 
         await assignmentCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
+        await assignOrderCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
 
-        ctx.body = { code: 0 , message: '删除任务成功' }
+        ctx.body = { code: 0 , message: '删除检测任务成功' }
     } catch (err) {
         logger.log('deleteAssignment异常:' + err, "error")
-        ctx.body = { code: -1 , message: '删除任务失败' }
+        ctx.body = { code: -1 , message: '删除检测任务失败' }
     }
 }
 
@@ -100,34 +104,35 @@ async function queryNoAssign (ctx, next) {
             quarterCode = '', 
             device = '', 
             area = '', 
-            equipment = '', 
-            sealPointType = '',
+            equipment = '',
             unreachable = '',
+            sealPointType = '',
             currentPage = 1,
             pageSize = 10
         } = ctx.request.query
 
         // 已分配的数量
-        const assignedCount = (await assignmentCollection.findOne({ companyNum, quarterCode })).assigned
-        // 根据动静密封筛选
-        const q = {}
-        if (sealPointType) q.sealPointType = sealPointType
-        let componentTypes = await componentTypeCollection.find(q).toArray()
-        componentTypeArr = lodash.map(componentTypes, 'componentType')
+        const assignment = await assignmentCollection.findOne({ companyNum, quarterCode })
+        const { assigned: assignedCount, detectType = '' } = assignment
+
+        // 筛选
+        const query = {}
+        if (detectType === '周期检') query.sealPointType = '动密封'
 
         // 未分配的数据
-        let componentData = await componentCollection.find().skip(+assignedCount).toArray()
+        let componentData = await componentCollection.find(query).skip(+assignedCount).toArray()
 
         // 多次筛选
-        componentData = lodash.filter(componentData, c => { return componentTypeArr.includes(c.componentType) })
         if(device) componentData = lodash.filter(componentData, c => { return c.device === device })
         if(area) componentData = lodash.filter(componentData, c => { return c.area === area })
         if(equipment) componentData = lodash.filter(componentData, c => { return c.equipment === equipment })
         if(unreachable) componentData = lodash.filter(componentData, c => { return c.unreachable === unreachable })
+        if(sealPointType) componentData = lodash.filter(componentData, c => { return c.sealPointType === sealPointType })
 
         // 位置描述拼接
         componentData = componentData.map(item => { 
             item.location = `${item.equipment} ${item.location} ${item.distance}米 ${item.floor}楼 ${item.high}米`
+            item.assignStatus = '未分配'
             return item
         })
 
@@ -160,6 +165,7 @@ async function assign (ctx, next) {
             labelExpandArr.push(c.labelExpand)
         }
 
+        const year = quarterCode.split('-')[0]
         const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
 
         // 新增任务
@@ -174,8 +180,8 @@ async function assign (ctx, next) {
             noDetected: 0, 
             leakFix: 0, 
             isFinished: '否',
-            startDate: dateMap[quarterStr].start,
-            endDate: dateMap[quarterStr].end,
+            startDate: year + '-' + dateMap[quarterStr].start,
+            endDate: year + '-' + dateMap[quarterStr].end,
             createDate: new Date(),
             createUser: username
         }
@@ -183,7 +189,7 @@ async function assign (ctx, next) {
         await assignOrderCollection.insertOne(data)
 
         // 更新
-        await assignmentCollection.updateOne({ quarterCode }, { $inc: { assigned: +assignPoint })
+        await assignmentCollection.updateOne({ quarterCode }, { $inc: { assigned: +assignPoint }})
 
         ctx.body = { code: 0 , message: '分配任务成功' }
     } catch (err) {
@@ -192,10 +198,44 @@ async function assign (ctx, next) {
     }
 }
 
+async function deleteAssign (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+        const { deleteData } = ctx.request.body
+        const quarterCodeArr = lodash.map(deleteData, 'quarterCode')
+
+        await assignOrderCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
+
+        ctx.body = { code: 0 , message: '删除任务成功' }
+    } catch (err) {
+        logger.log('deleteAssignment异常:' + err, "error")
+        ctx.body = { code: -1 , message: '删除任务失败' }
+    }
+}
+
+async function queryAssignDetail (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+        const { quarterCode = '', currentPage = 1, pageSize = 10 } = ctx.request.body
+
+        const query = { companyNum, quarterCode }
+        const assignOrderData = await assignOrderCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
+        const total = await assignOrderCollection.count(query)
+
+        ctx.body = { code: 0 , message: '查询任务详情成功', data: { assignOrderData, total } }
+    } catch (err) {
+        logger.log('queryAssignDetail异常:' + err, "error")
+        ctx.body = { code: -1 , message: '查询任务详情成功失败' }
+    }
+}
+
+
 module.exports = {
     queryAssignment,
     addAssignment,
     deleteAssignment,
     queryNoAssign,
     assign,
+    deleteAssign,
+    queryAssignDetail,
 }
