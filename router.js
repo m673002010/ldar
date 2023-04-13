@@ -97,8 +97,8 @@ router.post('/assignment/addAssignment', assignmentController.addAssignment)
 router.post('/assignment/deleteAssignment', assignmentController.deleteAssignment)
 router.get('/assignment/queryNoAssign', assignmentController.queryNoAssign)
 router.post('/assignment/assign', assignmentController.assign)
-router.post('/assignment/deleteAssign', assignmentController.deleteAssign)
 router.get('/assignment/queryAssignDetail', assignmentController.queryAssignDetail)
+router.post('/assignment/deleteAssign', assignmentController.deleteAssign)
 
 // 检测数据台账
 const ddlController = require('./controller/ddlController')

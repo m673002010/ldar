@@ -197,18 +197,24 @@ async function deleteAssign (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const quarterCodeArr = lodash.map(deleteData, 'quarterCode')
+        const quarterCode = lodash.map(deleteData, 'quarterCode')[0]
+        const assignNumArr = lodash.map(deleteData, 'assignNum')
 
         // 查出已分配的数据
         let { assignedArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
 
-        const assignOrderData = await assignOrderCollection.find({ companyNum, quarterCode: { $in: quarterCodeArr } }).toArray()
+        const assignOrderData = await assignOrderCollection.find({ 
+            companyNum, 
+            quarterCode,
+            assignNum: { $in: assignNumArr },
+        }).toArray()
+
         for (const a of assignOrderData) {
             assignedArr = lodash.difference(assignedArr, a.assignedArr)
         }
         await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
 
-        await assignOrderCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
+        await assignOrderCollection.deleteMany({ companyNum, quarterCode, assignNum: { $in: assignNumArr } })
 
         ctx.body = { code: 0 , message: '删除任务成功' }
     } catch (err) {
@@ -220,11 +226,19 @@ async function deleteAssign (ctx, next) {
 async function queryAssignDetail (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { quarterCode = '', currentPage = 1, pageSize = 10 } = ctx.request.body
+        const { quarterCode = '', currentPage = 1, pageSize = 10 } = ctx.request.query
 
         const query = { companyNum, quarterCode }
-        const assignOrderData = await assignOrderCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
+        let assignOrderData = await assignOrderCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
         const total = await assignOrderCollection.count(query)
+
+        assignOrderData = assignOrderData.map(item => {
+            item.detected = item.detectedArr.length
+            item.unDetected = item.assignedArr.length - item.detectedArr.length
+            item.leakFix = item.leakFixArr.length
+
+            return item
+        })
 
         ctx.body = { code: 0 , message: '查询任务详情成功', data: { assignOrderData, total } }
     } catch (err) {
