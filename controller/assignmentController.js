@@ -1,7 +1,6 @@
 const assignmentCollection = require('../db/assignment')
 const assignOrderCollection = require('../db/assignOrder')
 const componentCollection = require('../db/component')
-const componentTypeCollection = require('../db/componentType')
 const lodash = require('lodash')
 const quarterMap = {
     '第1季度': 'First-Ldar-Quarter',
@@ -22,11 +21,20 @@ async function queryAssignment (ctx, next) {
         const { year = '', quarter = '' } = ctx.request.query
         const query = { companyNum }
         if (year) query.year = year
-        if (quarter && quarter !== 'all') query.quarter = quarter
+        if (quarter) query.quarter = quarter
 
-        const data = await assignmentCollection.find(query).toArray()
+        let assignmentData = await assignmentCollection.find(query).toArray()
+        assignmentData = assignmentData.map(item => {
+            item.totalPoint = item.labelExpandArr.length
+            item.assigned = item.assignedArr.length
+            item.detected = item.detectedArr.length
+            item.unDetected = item.assignedArr.length - item.detectedArr.length
+            item.leakFix = item.leakFixArr.length
 
-        ctx.body = { code: 0 , message: '查询任务成功', data }
+            return item
+        })
+
+        ctx.body = { code: 0 , message: '查询任务成功', data: assignmentData }
     } catch (err) {
         logger.log('queryAssignment异常:' + err, "error")
         ctx.body = { code: -1 , message: '查询任务失败' }
@@ -47,30 +55,22 @@ async function addAssignment (ctx, next) {
             quarter, 
             year, 
             detectType,
-            assigned: 0,
-            noAssigned: 0,
-            detected: 0,
-            noDetected: 0,
-            leakFix: 0,
-            totalPoint: 0,
+            labelExpandArr: [],
+            assignedArr: [],
+            detectedArr: [],
+            leakFixArr: [],
             startDate: year + '-' + dateMap[quarterStr].start,
             endDate: year + '-' + dateMap[quarterStr].end,
             createDate: new Date(),
             createUser: username,
         }
 
-        if (detectType === '周期检') { // 周期检只检测动密封
-            let componentTypes = await componentTypeCollection.find({ sealPointType: '动密封' }).toArray()
-            componentTypeArr = lodash.map(componentTypes, 'componentType')
+        // 周期检只检测动密封，全检测检查动静密封
+        let componentData = []
+        if (detectType === '周期检') componentData = await componentCollection.find({ companyNum, sealPointType: '动密封' }).toArray()
+        else componentData = await componentCollection.find({ companyNum }).toArray()
 
-            let componentData = await componentCollection.find({ companyNum }).toArray()
-            componentData = lodash.filter(componentData, c => { return componentTypeArr.includes(c.componentType) })
-
-            // 动密封个数
-            data.totalPoint = componentData.length
-        } else {
-            data.totalPoint = await componentCollection.count()
-        }
+        data.labelExpandArr = lodash.map(componentData, 'labelExpand')
 
         await assignmentCollection.insertOne(data)
 
@@ -111,18 +111,14 @@ async function queryNoAssign (ctx, next) {
             pageSize = 10
         } = ctx.request.query
 
-        // 已分配的数量
-        const assignment = await assignmentCollection.findOne({ companyNum, quarterCode })
-        const { assigned: assignedCount, detectType = '' } = assignment
-
-        // 筛选
-        const query = {}
-        if (detectType === '周期检') query.sealPointType = '动密封'
+        // 总数量 已分配的数量
+        const { labelExpandArr, assignedArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
 
         // 未分配的数据
-        let componentData = await componentCollection.find(query).skip(+assignedCount).toArray()
+        const noAssignedArr = lodash.difference(labelExpandArr, assignedArr)
+        let componentData = await componentCollection.find({ companyNum, labelExpand: { $in: noAssignedArr } }).toArray()
 
-        // 多次筛选
+        // 根据条件筛选
         if(device) componentData = lodash.filter(componentData, c => { return c.device === device })
         if(area) componentData = lodash.filter(componentData, c => { return c.area === area })
         if(equipment) componentData = lodash.filter(componentData, c => { return c.equipment === equipment })
@@ -151,18 +147,18 @@ async function assign (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const { quarterCode = '', assignNum = '', employee = '', assignPoint = '' } = ctx.request.body
 
-        // 已分配的数量
-        const assignedCount = (await assignmentCollection.findOne({ companyNum, quarterCode })).assigned
-        // console.log("assign assignedCount", assignedCount)
+        // 获取未分配
+        let { assignedArr, labelExpandArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
+        let noAssignedArr = lodash.difference(labelExpandArr, assignedArr)
 
-        // 要分配的数据
-        let componentData = await componentCollection.find().skip(+assignedCount).toArray()
-        componentData = componentData.slice(0, assignPoint)
-
-        // 记录 标签号 + 扩展号
-        const labelExpandArr = []
-        for (const c of componentData) {
-            labelExpandArr.push(c.labelExpand)
+        // 分配
+        let assignArr = []
+        if (noAssignedArr.length >= assignPoint) {
+            assignArr = noAssignedArr.slice(0, assignPoint)
+            assignedArr = assignedArr.concat(assignArr)
+        } else {
+            assignArr = noAssignedArr
+            assignedArr = assignedArr.concat(assignArr)
         }
 
         const year = quarterCode.split('-')[0]
@@ -173,12 +169,11 @@ async function assign (ctx, next) {
             companyNum,
             quarterCode, 
             assignNum, 
-            employee, 
-            assignPoint: +assignPoint, 
-            labelExpandArr, 
-            detected: 0, 
-            noDetected: 0, 
-            leakFix: 0, 
+            employee,
+            assignedArr: assignArr, 
+            detectedArr: [], 
+            unDetectedArr: [], 
+            leakFixArr: [], 
             isFinished: '否',
             startDate: year + '-' + dateMap[quarterStr].start,
             endDate: year + '-' + dateMap[quarterStr].end,
@@ -189,7 +184,7 @@ async function assign (ctx, next) {
         await assignOrderCollection.insertOne(data)
 
         // 更新
-        await assignmentCollection.updateOne({ quarterCode }, { $inc: { assigned: +assignPoint }})
+        await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
 
         ctx.body = { code: 0 , message: '分配任务成功' }
     } catch (err) {
@@ -203,6 +198,15 @@ async function deleteAssign (ctx, next) {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
         const quarterCodeArr = lodash.map(deleteData, 'quarterCode')
+
+        // 查出已分配的数据
+        let { assignedArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
+
+        const assignOrderData = await assignOrderCollection.find({ companyNum, quarterCode: { $in: quarterCodeArr } }).toArray()
+        for (const a of assignOrderData) {
+            assignedArr = lodash.difference(assignedArr, a.assignedArr)
+        }
+        await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
 
         await assignOrderCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
 
