@@ -100,6 +100,13 @@ router.post('/assignment/assign', assignmentController.assign)
 router.get('/assignment/queryAssignDetail', assignmentController.queryAssignDetail)
 router.post('/assignment/deleteAssign', assignmentController.deleteAssign)
 
+// 下载检测任务
+const ddtController = require('./controller/ddtController')
+router.get('/downloadDetectionTask/queryTask', ddtController.queryTask)
+router.get('/downloadDetectionTask/downloadTask', ddtController.downloadTask)
+router.get('/downloadDetectionTask/queryQuarterCode', ddtController.queryQuarterCode)
+router.get('/downloadDetectionTask/queryAssignNum', ddtController.queryAssignNum)
+
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
