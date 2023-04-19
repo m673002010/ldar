@@ -107,6 +107,10 @@ router.get('/downloadDetectionTask/downloadTask', ddtController.downloadTask)
 router.get('/downloadDetectionTask/queryQuarterCode', ddtController.queryQuarterCode)
 router.get('/downloadDetectionTask/queryAssignNum', ddtController.queryAssignNum)
 
+// 上传检测任务
+const udlController = require('./controller/udlController')
+router.post('/uploadDetectionLedger/uploadFile', udlController.uploadFile)
+
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)

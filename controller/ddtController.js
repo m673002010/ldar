@@ -27,7 +27,7 @@ async function queryTask (ctx, next) {
         ctx.body = { code: 0 , message: '查询任务详情成功', data: { assignOrderData, total } }
     } catch (err) {
         logger.log('queryTask异常:' + err, "error")
-        ctx.body = { code: -1 , message: '查询任务详情成功失败' }
+        ctx.body = { code: -1 , message: '查询任务详情失败' }
     }
 }
 

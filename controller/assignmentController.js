@@ -125,15 +125,15 @@ async function queryNoAssign (ctx, next) {
         if(unreachable) componentData = lodash.filter(componentData, c => { return c.unreachable === unreachable })
         if(sealPointType) componentData = lodash.filter(componentData, c => { return c.sealPointType === sealPointType })
 
+        const total = componentData.length
+        componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
+
         // 位置描述拼接
         componentData = componentData.map(item => { 
             item.location = `${item.equipment} ${item.location} ${item.distance}米 ${item.floor}楼 ${item.high}米`
             item.assignStatus = '未分配'
             return item
         })
-
-        const total = componentData.length
-        componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
 
         ctx.body = { code: 0 , message: '未分配查询成功', data: { componentData, total } }
     } catch (err) {
@@ -164,15 +164,14 @@ async function assign (ctx, next) {
         const year = quarterCode.split('-')[0]
         const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
 
-        // 新增任务
+        // 新增任务单
         const data = {
             companyNum,
             quarterCode, 
             assignNum, 
             employee,
             assignedArr: assignArr, 
-            detectedArr: [], 
-            unDetectedArr: [], 
+            detectedArr: [],
             leakFixArr: [], 
             isFinished: '否',
             startDate: year + '-' + dateMap[quarterStr].start,
@@ -183,7 +182,7 @@ async function assign (ctx, next) {
 
         await assignOrderCollection.insertOne(data)
 
-        // 更新
+        // 更新检测周期
         await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
 
         ctx.body = { code: 0 , message: '分配任务成功' }
@@ -200,7 +199,6 @@ async function deleteAssign (ctx, next) {
         const quarterCode = lodash.map(deleteData, 'quarterCode')[0]
         const assignNumArr = lodash.map(deleteData, 'assignNum')
 
-        // 查出已分配的数据
         let { assignedArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
 
         const assignOrderData = await assignOrderCollection.find({ 
@@ -209,9 +207,13 @@ async function deleteAssign (ctx, next) {
             assignNum: { $in: assignNumArr },
         }).toArray()
 
+        // 删除任务单时，检测周期对应的数据也减除
         for (const a of assignOrderData) {
             assignedArr = lodash.difference(assignedArr, a.assignedArr)
+            detectedArr = lodash.difference(detectedArr, a.detectedArr)
+            leakFixArr = lodash.difference(leakFixArr, a.leakFixArr)
         }
+
         await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
 
         await assignOrderCollection.deleteMany({ companyNum, quarterCode, assignNum: { $in: assignNumArr } })
@@ -246,7 +248,6 @@ async function queryAssignDetail (ctx, next) {
         ctx.body = { code: -1 , message: '查询任务详情成功失败' }
     }
 }
-
 
 module.exports = {
     queryAssignment,
