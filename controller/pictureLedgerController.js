@@ -30,7 +30,7 @@ async function uploadPicture (ctx, next) {
         const upStream = fs.createWriteStream(path.join(__dirname, `../static/pictureLedger/${file.originalFilename}`))
         reader.pipe(upStream)
 
-        const pictureRecord = await pictureLedgerCollection.findOne({ picture: file.originalFilename })
+        const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: file.originalFilename })
 
         if (!pictureRecord) {
             const data = { companyNum, label: file.originalFilename.split('.')[0], picture: file.originalFilename, picturePath: `/pictureLedger/${file.originalFilename}` }

@@ -6,12 +6,13 @@ const lodash = require('lodash')
 async function queryTask (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { quarterCode = '', assignNum = '', employee = '', currentPage = 1, pageSize = 10 } = ctx.request.query
+        const { quarterCode = '', assignNum = '', employee = '', isUploaded = '', currentPage = 1, pageSize = 10 } = ctx.request.query
 
         const query = { companyNum }
         if (quarterCode) query.quarterCode = quarterCode
         if (assignNum) query.assignNum = assignNum
         if (employee) query.employee = employee
+        if (isUploaded) query.isFinished = isUploaded === '已上传' ?  '是' : '否'
 
         let assignOrderData = await assignOrderCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
         const total = await assignOrderCollection.count(query)

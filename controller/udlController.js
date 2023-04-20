@@ -3,7 +3,7 @@ const assignOrderCollection = require('../db/assignOrder')
 const detectLedgerCollection = require('../db/detectLedger')
 const lodash = require('lodash')
 
-async function uploadFile (ctx, next) {
+async function uploadDetectTask (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { quarterCode = '', assignNum = '', detectFile = '' } = ctx.request.body
@@ -74,5 +74,5 @@ async function uploadFile (ctx, next) {
 }
 
 module.exports = {
-    uploadFile
+    uploadDetectTask
 }
