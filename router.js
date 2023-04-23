@@ -111,7 +111,12 @@ router.get('/downloadDetectionTask/queryAssignNum', ddtController.queryAssignNum
 const udlController = require('./controller/udlController')
 router.post('/uploadDetectionLedger/uploadDetectTask', udlController.uploadDetectTask)
 
-// 上传检测任务
+// 上传复测信息
+const uriController = require('./controller/uriController')
+router.get('/uploadRetestInfo/queryRetestInfo', uriController.queryRetestInfo)
+router.post('/uploadRetestInfo/importRetestInfo', uriController.importRetestInfo)
+
+// 上传检测文件
 const udfController = require('./controller/udfController')
 router.get('/uploadDetectionLedger/queryDetectFile', udfController.queryDetectFile)
 router.post('/uploadDetectionLedger/uploadDetectFile', udfController.uploadDetectFile)
