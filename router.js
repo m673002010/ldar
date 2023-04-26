@@ -111,6 +111,11 @@ router.get('/downloadDetectionTask/queryAssignNum', ddtController.queryAssignNum
 const udlController = require('./controller/udlController')
 router.post('/uploadDetectionLedger/uploadDetectTask', udlController.uploadDetectTask)
 
+// 导出维修工单
+const eroController = require('./controller/eroController')
+router.post('/exportRepairOrder/queryRepairInfo', eroController.queryRepairInfo)
+router.post('/exportRepairOrder/exportRetestTask', eroController.exportRetestTask)
+
 // 上传复测信息
 const uriController = require('./controller/uriController')
 router.get('/uploadRetestInfo/queryRetestInfo', uriController.queryRetestInfo)

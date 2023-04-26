@@ -17,16 +17,19 @@ async function uploadDetectTask (ctx, next) {
 
         // 补充对应的检测周期和任务单号
         detectData = detectData.map(item => {
+            item.companyNum = companyNum
             item.quarterCode = quarterCode
             item.assignNum = assignNum
+            item.labelExpand = item.label + '-' + item.expand
+            item.detectDate = new Date(item.detectDate)
+            item.startDate = new Date(item.startDate)
+            item.endDate = new Date(item.endDate)
 
             return item
         })
 
         // 提取上传数据中的检测点
-        const detectLabelExpandArr = detectData.map(item => {
-            return item.label + '-' + item.expand
-        })
+        const detectLabelExpandArr = lodash.map(detectData, 'labelExpand')
 
         // 任务单分配点
         const assignOrderData = await assignOrderCollection.findOne({ companyNum, quarterCode, assignNum })
@@ -51,6 +54,8 @@ async function uploadDetectTask (ctx, next) {
             }
         })
 
+        // 避免重复上传，先删除旧台账
+        await detectLedgerCollection.deleteMany({ companyNum, quarterCode, assignNum })
         // 新增检测任务台账
         await detectLedgerCollection.insertMany(detectData)
 
@@ -68,7 +73,7 @@ async function uploadDetectTask (ctx, next) {
 
         ctx.body = { code: 0 , message: '上传检测任务成功' }
     } catch (err) {
-        logger.log('uploadFile异常:' + err, "error")
+        logger.log('uploadDetectTask异常:' + err, "error")
         ctx.body = { code: -1 , message: '上传检测任务失败' }
     }
 }

@@ -1,5 +1,6 @@
 const retestInfoCollection = require('../db/retestInfo')
-const lodash = require('lodash')
+const detectLedgerCollection = require('../db/detectLedger')
+const componentCollection = require('../db/component')
 
 async function queryRetestInfo (ctx, next) {
     try {
@@ -10,8 +11,8 @@ async function queryRetestInfo (ctx, next) {
         if (device) query.device = device
         if (area) query.area = area
         if (equipment) query.equipment = equipment
-        if (componentType) query.componentType = componentType
-        if (isLeak) query.isLeak = isLeak
+        // if (componentType) query.componentType = componentType
+        // if (isLeak) query.isLeak = isLeak
         if (isDelayRepair) query.isDelayRepair = isDelayRepair
 
         const retestInfoData = await retestInfoCollection.find(query).toArray()
@@ -26,11 +27,16 @@ async function queryRetestInfo (ctx, next) {
 async function importRetestInfo (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { importData = [] } = ctx.request.body
+        const { quarterCode = '', importData = [] } = ctx.request.body
 
         const data = importData.map(item => {
-            Object.assign(item, { companyNum })
+            item.companyNum = companyNum
+            item.quarterCode = quarterCode
             item.labelExpand = item.label + '-' + item.expand
+            item.repairEndDate = new Date(item.repairEndDate)
+            item.retestStartDate = new Date(item.retestStartDate)
+            item.retestEndDate = new Date(item.retestEndDate)
+            item.planRepairDate = new Date(item.planRepairDate)
 
             return item
         })
