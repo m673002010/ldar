@@ -16,6 +16,7 @@ async function queryRetestInfo (ctx, next) {
         if (equipment) query.equipment = equipment
         if (isDelayRepair) query.isDelayRepair = isDelayRepair
 
+        // 复测信息
         let retestInfoData = await retestInfoCollection.find(query).toArray()
 
         const labelExpandArr = lodash.map(retestInfoData, 'labelExpand')
@@ -44,7 +45,7 @@ async function queryRetestInfo (ctx, next) {
             return item
         })
 
-        // 补充信息
+        // 补充组件、检测信息、阈值到复测信息
         retestInfoData = retestInfoData.map(item => {
             const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
             const d = lodash.find(detectData, { 'labelExpand': item.labelExpand, 'quarterCode': item.quarterCode })

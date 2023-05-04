@@ -13,7 +13,7 @@
 	startDate: Date,
 	endDate: Date,
 	runTime: String,
-	employee: String,
+	detectPeople: String,
 	instrument: String,
 	backgroundValue: String,
 	detectValue: String,

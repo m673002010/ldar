@@ -145,7 +145,7 @@ async function queryNoAssign (ctx, next) {
 async function assign (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { quarterCode = '', assignNum = '', employee = '', assignPoint = '' } = ctx.request.body
+        const { quarterCode = '', assignNum = '', detectPeople = '', assignPoint = '' } = ctx.request.body
 
         // 获取未分配
         let { assignedArr, labelExpandArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
@@ -169,7 +169,7 @@ async function assign (ctx, next) {
             companyNum,
             quarterCode, 
             assignNum, 
-            employee,
+            detectPeople,
             assignedArr: assignArr, 
             detectedArr: [],
             leakFixArr: [], 

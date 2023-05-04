@@ -129,7 +129,7 @@ router.post('/uploadDetectionLedger/deleteDetectFile', udfController.deleteDetec
 
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
-router.get('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
+router.post('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
 
 // 组件图片台账
 const cplController = require('./controller/cplController')

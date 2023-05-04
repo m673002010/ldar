@@ -3,7 +3,7 @@
     companyNum: String,
     quarterCode: String,
     assginNum: String,
-    employee: String,
+    detectPeople: String,
     assignedArr: Array, 
     detectedArr: Array,
     leakFixArr: Array,
