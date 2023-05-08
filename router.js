@@ -36,6 +36,12 @@ router.get('/company/dataPanel', companyController.dataPanel)
 router.get('/company/getBindRegulation', companyController.getBindRegulation)
 router.post('/company/bindRegulation', companyController.bindRegulation)
 
+// 数据面板
+const dataPanelController = require('./controller/dataPanelController')
+router.get('/dataPanel/pointStatic', dataPanelController.pointStatic)
+router.get('/dataPanel/componentType', dataPanelController.componentType)
+router.get('/dataPanel/sealPointType', dataPanelController.sealPointType)
+
 // 组件管理
 const componentController = require('./controller/componentController')
 router.get('/component/queryComponent', componentController.queryComponent)
