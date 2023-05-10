@@ -12,6 +12,7 @@ router.post('/user/updateUser', userController.updateUser)
 router.post('/user/deleteUser', userController.deleteUser)
 router.post('/user/allocateRole', userController.allocateRole)
 router.get('/user/userInfo', userController.userInfo)
+router.get('/user/isAdmin', userController.isAdmin)
 
 // 角色
 const roleController = require('./controller/roleController')

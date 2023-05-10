@@ -90,6 +90,10 @@ async function userInfo (ctx, next) {
     ctx.body = await userService.userInfo(ctx)
 }
 
+async function isAdmin (ctx, next) {
+    ctx.body = await userService.isAdmin(ctx)
+}
+
 module.exports = {
     register,
     login,
@@ -99,5 +103,6 @@ module.exports = {
     updateUser,
     deleteUser,
     allocateRole,
-    userInfo
+    userInfo,
+    isAdmin
 }

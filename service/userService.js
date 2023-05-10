@@ -197,6 +197,21 @@ async function userInfo (ctx, next) {
     }
 }
 
+async function isAdmin (ctx, next) {
+    try {
+        const userInfo = ctx.userInfo
+
+        const user = await userCollection.findOne({ userId: +userInfo.userId })
+        console.log('user', user)
+        const admin = user.companyNum === 'all' ? 1 : 0
+        
+        return { code: 0 , message: '判断管理员成功', data: admin }
+    } catch (err) {
+        console.log('isAdmin异常:', err)
+        return { code: -1 , message: '判断管理员失败' }
+    }
+}
+
 module.exports = {
     createFirstAccount,
     register,
@@ -207,5 +222,6 @@ module.exports = {
     updateUser,
     deleteUser,
     allocateRole,
-    userInfo
+    userInfo,
+    isAdmin
 }
