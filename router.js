@@ -114,9 +114,15 @@ router.get('/downloadDetectionTask/downloadTask', ddtController.downloadTask)
 router.get('/downloadDetectionTask/queryQuarterCode', ddtController.queryQuarterCode)
 router.get('/downloadDetectionTask/queryAssignNum', ddtController.queryAssignNum)
 
-// 上传检测任务
+// 上传检测台账
 const udlController = require('./controller/udlController')
 router.post('/uploadDetectionLedger/uploadDetectTask', udlController.uploadDetectTask)
+
+// 上传检测文件
+const udfController = require('./controller/udfController')
+router.get('/uploadDetectionLedger/queryDetectFile', udfController.queryDetectFile)
+router.post('/uploadDetectionLedger/uploadDetectFile', udfController.uploadDetectFile)
+router.post('/uploadDetectionLedger/deleteDetectFile', udfController.deleteDetectFile)
 
 // 导出维修工单
 const eroController = require('./controller/eroController')
@@ -127,12 +133,6 @@ router.post('/exportRepairOrder/exportRetestTask', eroController.exportRetestTas
 const uriController = require('./controller/uriController')
 router.get('/uploadRetestInfo/queryRetestInfo', uriController.queryRetestInfo)
 router.post('/uploadRetestInfo/importRetestInfo', uriController.importRetestInfo)
-
-// 上传检测文件
-const udfController = require('./controller/udfController')
-router.get('/uploadDetectionLedger/queryDetectFile', udfController.queryDetectFile)
-router.post('/uploadDetectionLedger/uploadDetectFile', udfController.uploadDetectFile)
-router.post('/uploadDetectionLedger/deleteDetectFile', udfController.deleteDetectFile)
 
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
