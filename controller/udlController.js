@@ -1,12 +1,15 @@
 const assignmentCollection = require('../db/assignment')
 const assignOrderCollection = require('../db/assignOrder')
 const detectLedgerCollection = require('../db/detectLedger')
+const componentCollection = require('../db/component')
+const companyCollection = require('../db/company')
+const regulationComponentCollection = require('../db/regulationComponent')
 const lodash = require('lodash')
 
 async function uploadDetectTask (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { quarterCode = '', assignNum = '', detectFile = '' } = ctx.request.body
+        const { quarterCode = '', assignNum = '' } = ctx.request.body
         let { detectData = [] } = ctx.request.body
 
         // 上传数据为空直接返回
@@ -41,9 +44,26 @@ async function uploadDetectTask (ctx, next) {
             return
         }
 
+        // 检测点对应的组件
+        const componentData = await componentCollection.find({ labelExpand: { $in: detectLabelExpandArr } }).toArray()
+
+        // 组件阈值
+        const regulationCode = (await companyCollection.findOne({ companyNum })).regulationCode
+        const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
+        const thresholdData = regulationComponentData.map(item => {
+            const obj = { componentType: item.componentType, mediumStatus: item.mediumStatus, threshold: item.threshold }
+            return obj
+        })
+
         // 泄漏点计算
-        // todo
         const leakFixArr = []
+        for (const item of detectData) {
+            const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            const t = lodash.find(thresholdData, { 'componentType': c.componentType, 'mediumStatus': c.mediumStatus })
+
+            const detectNetWorth = item.detectValue - item.backgroundValue
+            if (detectNetWorth > t.threshold) leakFixArr.push(item.labelExpand)
+        }
 
         // 更新任务单状态
         await assignOrderCollection.updateOne({ companyNum, quarterCode, assignNum }, { 

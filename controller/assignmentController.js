@@ -1,5 +1,6 @@
 const assignmentCollection = require('../db/assignment')
 const assignOrderCollection = require('../db/assignOrder')
+const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
 const lodash = require('lodash')
 const quarterMap = {
@@ -34,10 +35,10 @@ async function queryAssignment (ctx, next) {
             return item
         })
 
-        ctx.body = { code: 0 , message: '查询任务成功', data: assignmentData }
+        ctx.body = { code: 0 , message: '查询检测周期成功', data: assignmentData }
     } catch (err) {
         logger.log('queryAssignment异常:' + err, "error")
-        ctx.body = { code: -1 , message: '查询任务失败' }
+        ctx.body = { code: -1 , message: '查询检测周期失败' }
     }
 }
 
@@ -74,10 +75,10 @@ async function addAssignment (ctx, next) {
 
         await assignmentCollection.insertOne(data)
 
-        ctx.body = { code: 0 , message: '添加任务成功' }
+        ctx.body = { code: 0 , message: '添加检测周期成功' }
     } catch (err) {
         logger.log('addAssignment异常:' + err, "error")
-        ctx.body = { code: -1 , message: '添加任务失败' }
+        ctx.body = { code: -1 , message: '添加检测周期失败' }
     }
 }
 
@@ -89,11 +90,12 @@ async function deleteAssignment (ctx, next) {
 
         await assignmentCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
         await assignOrderCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
+        await detectLedgerCollection.deleteMany({ companyNum, quarterCode: { $in: quarterCodeArr } })
 
-        ctx.body = { code: 0 , message: '删除检测任务成功' }
+        ctx.body = { code: 0 , message: '删除检测周期成功' }
     } catch (err) {
         logger.log('deleteAssignment异常:' + err, "error")
-        ctx.body = { code: -1 , message: '删除检测任务失败' }
+        ctx.body = { code: -1 , message: '删除检测周期失败' }
     }
 }
 
@@ -135,10 +137,10 @@ async function queryNoAssign (ctx, next) {
             return item
         })
 
-        ctx.body = { code: 0 , message: '未分配查询成功', data: { componentData, total } }
+        ctx.body = { code: 0 , message: '未分配任务查询成功', data: { componentData, total } }
     } catch (err) {
         logger.log('queryNoAssign异常:' + err, "error")
-        ctx.body = { code: -1 , message: '未分配查询失败' }
+        ctx.body = { code: -1 , message: '未分配任务查询失败' }
     }
 }
 
@@ -199,7 +201,7 @@ async function deleteAssign (ctx, next) {
         const quarterCode = lodash.map(deleteData, 'quarterCode')[0]
         const assignNumArr = lodash.map(deleteData, 'assignNum')
 
-        let { assignedArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
+        let { assignedArr, detectedArr, leakFixArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
 
         const assignOrderData = await assignOrderCollection.find({ 
             companyNum, 
@@ -214,13 +216,13 @@ async function deleteAssign (ctx, next) {
             leakFixArr = lodash.difference(leakFixArr, a.leakFixArr)
         }
 
-        await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
-
+        await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr, detectedArr, leakFixArr } })
         await assignOrderCollection.deleteMany({ companyNum, quarterCode, assignNum: { $in: assignNumArr } })
+        await detectLedgerCollection.deleteMany({ companyNum, quarterCode, assignNum: { $in: assignNumArr } })
 
         ctx.body = { code: 0 , message: '删除任务成功' }
     } catch (err) {
-        logger.log('deleteAssignment异常:' + err, "error")
+        logger.log('deleteAssign异常:' + err, "error")
         ctx.body = { code: -1 , message: '删除任务失败' }
     }
 }
