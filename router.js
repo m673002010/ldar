@@ -137,6 +137,7 @@ router.post('/uploadRetestInfo/importRetestInfo', uriController.importRetestInfo
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.post('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
+router.post('/ddl/exportDetectionDataLedger', ddlController.exportDetectionDataLedger)
 
 // 组件图片台账
 const cplController = require('./controller/cplController')

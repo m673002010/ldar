@@ -176,13 +176,12 @@ async function exportDetectionDataLedger (ctx, next) {
             item.isLeak = item.detectValue >= item.threshold ? '是' : '否'
             item.leakLevel = '安全'
 
-            return item
-        })
-
-        detectData = detectData.map(item => {
-            item.detectStartDate = item.startDate
-            item.detectEndDate = item.endDate
+            // 导出表格字段调整
             item.detectNetWorth = item.detectValue - item.backgroundValue
+            item.picture = item.label
+            item.rateBeforeRepair = item.leakRate
+            item.valueBeforeRepair = item.detectNetWorth
+            item.backgroundValueBeforeRepair = item.backgroundValue
 
             return item
         })

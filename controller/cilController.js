@@ -86,8 +86,6 @@ async function exportComponentInfoLedger (ctx, next) {
         if (sealPointType) query.sealPointType = sealPointType
 
         let componentData = await componentCollection.find(query).toArray()
-        const total = componentData.length
-        componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
 
         // 补充法规和检测频率信息
         const arr = []
