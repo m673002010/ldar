@@ -142,6 +142,7 @@ router.post('/ddl/exportDetectionDataLedger', ddlController.exportDetectionDataL
 // 组件图片台账
 const cplController = require('./controller/cplController')
 router.get('/cpl/componentPictureLedger', cplController.componentPictureLedger)
+router.get('/cpl/exportComponentPictureLedger', cplController.exportComponentPictureLedger)
 
 // 泄露信息台账
 const leakInfoLedgerController = require('./controller/leakInfoLedgerController')
