@@ -78,11 +78,6 @@ router.post('/equipment/addEquipment', equipmentController.addEquipment)
 router.post('/equipment/editEquipment', equipmentController.editEquipment)
 router.post('/equipment/deleteEquipment', equipmentController.deleteEquipment)
 
-// 组件信息台账
-const cilController = require('./controller/cilController')
-router.get('/cil/componentInfoLedger', cilController.componentInfoLedger)
-router.get('/cil/exportComponentInfoLedger', cilController.exportComponentInfoLedger)
-
 // 法规管理
 const regulationController = require('./controller/regulationController')
 router.get('/regulation/queryRegulation', regulationController.queryRegulation)
@@ -134,6 +129,11 @@ const uriController = require('./controller/uriController')
 router.get('/uploadRetestInfo/queryRetestInfo', uriController.queryRetestInfo)
 router.post('/uploadRetestInfo/importRetestInfo', uriController.importRetestInfo)
 
+// 组件信息台账
+const cilController = require('./controller/cilController')
+router.get('/cil/componentInfoLedger', cilController.componentInfoLedger)
+router.get('/cil/exportComponentInfoLedger', cilController.exportComponentInfoLedger)
+
 // 检测数据台账
 const ddlController = require('./controller/ddlController')
 router.post('/ddl/detectionDataLedger', ddlController.detectionDataLedger)
@@ -151,6 +151,9 @@ router.get('/leakInfoLedger/queryLeakInfoLedger', leakInfoLedgerController.query
 // 历史排放统计
 const hesController = require('./controller/hesController')
 router.get('/hes/historyEmissionStatistics', hesController.historyEmissionStatistics)
+router.post('/hes/addHes', hesController.addHes)
+router.post('/hes/editHes', hesController.editHes)
+router.post('/hes/deleteHes', hesController.deleteHes)
 
 // 排放量计算报告
 const ecrController = require('./controller/ecrController')
