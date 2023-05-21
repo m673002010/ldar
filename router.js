@@ -166,6 +166,9 @@ router.get('/icr/instrumentCalibrationRecord', icrController.instrumentCalibrati
 // 历史检测统计
 const hdsController = require('./controller/hdsController')
 router.get('/hds/historyDetectionStatistics', hdsController.historyDetectionStatistics)
+router.post('/hds/addHds', hdsController.addHds)
+router.post('/hds/editHds', hdsController.editHds)
+router.post('/hds/deleteHds', hdsController.deleteHds)
 
 // 组件类型排放分析
 const cteaController = require('./controller/cteaController')
