@@ -4,11 +4,12 @@ const { ObjectId } = require('mongodb')
 
 async function historyEmissionStatistics (ctx, next) {
     try {
-        const { companyNum, year } = ctx.userInfo
+        const { companyNum } = ctx.userInfo
+        const { year = '' } = ctx.request.query
         const query = { companyNum }
 
         let data = await hesCollection.find(query).toArray()
-        if (year) data = lodash.filter(data, item => { return item.detectionCycle.indexof(year) !== -1 })
+        if (year) data = lodash.filter(data, item => { return item.detectionCycle.indexOf(year) !== -1 })
         
         ctx.body = { code: 0 , message: '历史排放统计查询成功', data }
     } catch (err) {

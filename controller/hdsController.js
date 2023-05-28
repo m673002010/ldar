@@ -4,11 +4,12 @@ const { ObjectId } = require('mongodb')
 
 async function historyDetectionStatistics (ctx, next) {
     try {
-        const { companyNum, year } = ctx.userInfo
+        const { companyNum } = ctx.userInfo
+        const { year = '' } = ctx.request.query
         const query = { companyNum }
 
         let data = await hdsCollection.find(query).toArray()
-        if (year) data = lodash.filter(data, item => { return item.detectionCycle.indexof(year) !== -1 })
+        if (year) data = lodash.filter(data, item => { return item.detectionCycle.indexOf(year) !== -1 })
         
         ctx.body = { code: 0 , message: '历史检测统计查询成功', data }
     } catch (err) {
@@ -25,11 +26,9 @@ async function addHds (ctx, next) {
             shouldDetect = '', 
             hasDetect = '', 
             leakPoint = '',
-            finishRatio = '',
-            leakRatio = '',
             emissionBeforeRepair = '',
             emissionAfterRepair = '',
-            decrease = ''
+            emissionDecrease = ''
         } = ctx.request.body
 
         const data = {
@@ -38,11 +37,9 @@ async function addHds (ctx, next) {
             shouldDetect, 
             hasDetect, 
             leakPoint, 
-            finishRatio, 
-            leakRatio,
             emissionBeforeRepair,
             emissionAfterRepair,
-            decrease,
+            emissionDecrease
         }
 
         await hdsCollection.insertOne(data)
