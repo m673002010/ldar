@@ -43,6 +43,11 @@ router.get('/dataPanel/pointStatic', dataPanelController.pointStatic)
 router.get('/dataPanel/componentType', dataPanelController.componentType)
 router.get('/dataPanel/sealPointType', dataPanelController.sealPointType)
 
+// 首页
+const firstPageController = require('./controller/firstPageController')
+router.get('/firstPage/currentCycle', firstPageController.currentCycle)
+router.get('/firstPage/allCycle', firstPageController.allCycle)
+
 // 组件管理
 const componentController = require('./controller/componentController')
 router.get('/component/queryComponent', componentController.queryComponent)
