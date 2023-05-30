@@ -30,9 +30,9 @@ async function currentCycle (ctx, next) {
         const detectedArr = assignmentData.detectedArr
         const leakFixArr = assignmentData.leakFixArr
 
-        // 是否可达的数量
-        const unreachableCount = await componentCollection.count({ companyNum, labelExpand: { $in: labelExpandArr }, unreachable: '是' })
-        const reachableCount = await componentCollection.count({ companyNum, labelExpand: { $in: labelExpandArr }, unreachable: '否' })
+        // 可达不可达点数
+        const unreachableCount = await componentCollection.count({ companyNum, labelExpand: { $in: detectedArr }, unreachable: '是' })
+        const reachableCount = await componentCollection.count({ companyNum, labelExpand: { $in: detectedArr }, unreachable: '否' })
 
         // 装置总数量
         const componentAllData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
@@ -58,6 +58,7 @@ async function currentCycle (ctx, next) {
             deviceLeakArr.push({ name: key, value: deviceLeakData[key].length })
         }
 
+        // 表格
         const tableData = deviceAllArr.map(item => {
             const obj = { device: item.name }
             const d = lodash.find(deviceDetectedArr, { 'name': item.name })
@@ -79,10 +80,8 @@ async function currentCycle (ctx, next) {
             delayFix: 0,
             unreachableCount,
             reachableCount,
-            // deviceAllArr,
-            // deviceDetectedArr,
-            tableData,
             deviceLeakArr,
+            tableData,
         }
 
         ctx.body = { code: 0 , message: '获取当前周期信息成功', data }
@@ -96,12 +95,37 @@ async function allCycle (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
 
-        let detectedArr = []
         const assignmentData = await assignmentCollection.find({ companyNum }).toArray()
+
+        // 装置总数量
+        let labelExpandArr = []
+        assignmentData.map(item => labelExpandArr = labelExpandArr.concat(item.labelExpandArr))
+        const componentAllData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
+        let deviceALLData = labelExpandArr.map(labelExpand => {
+            const c = lodash.find(componentAllData, { 'labelExpand': labelExpand })
+            return { device: c.device }
+        })
+        deviceALLData = lodash.groupBy(deviceALLData, 'device')
+        const deviceAllArr = []
+        for (const key in deviceALLData) {
+            deviceAllArr.push({ name: key, value: deviceALLData[key].length })
+        }
+
+        // 装置检测数量
+        let detectedArr = []
         assignmentData.map(item => detectedArr = detectedArr.concat(item.detectedArr))
         const componentDetectedData = await componentCollection.find({ companyNum, labelExpand: { $in: detectedArr } }).toArray()
+        let deviceDetectedData = detectedArr.map(labelExpand => {
+            const c = lodash.find(componentDetectedData, { 'labelExpand': labelExpand })
+            return { device: c.device }
+        })
+        deviceDetectedData = lodash.groupBy(deviceDetectedData, 'device')
+        const deviceDetectedArr = []
+        for (const key in deviceDetectedData) {
+            deviceDetectedArr.push({ name: key, value: deviceDetectedData[key].length })
+        }
 
-        // 计算可达不可达点数
+        // 可达不可达点数
         let unreachableCount = 0
         let reachableCount = 0
         detectedArr.map(labelExpand => {
@@ -109,19 +133,35 @@ async function allCycle (ctx, next) {
             c.unreachable === '是' ? unreachableCount++ : reachableCount++
         })
 
-        // 泄漏点的装置信息
+        // 装置泄漏数量
         let leakFixArr = []
         assignmentData.map(item => leakFixArr = leakFixArr.concat(item.leakFixArr))
         const componentLeakData = await componentCollection.find({ companyNum, labelExpand: { $in: leakFixArr } }).toArray()
-        const deviceLeakData = leakFixArr.map(labelExpand => {
+        let deviceLeakData = leakFixArr.map(labelExpand => {
             const c = lodash.find(componentLeakData, { 'labelExpand': labelExpand })
             return { device: c.device }
         })
-        const deviceData = lodash.groupBy(deviceLeakData, 'device')
-        const deviceArr = []
-        for (const key in deviceData) {
-            deviceArr.push({ name: key, value: deviceData[key].length })
+        deviceLeakData = lodash.groupBy(deviceLeakData, 'device')
+        const deviceLeakArr = []
+        for (const key in deviceLeakData) {
+            deviceLeakArr.push({ name: key, value: deviceLeakData[key].length })
         }
+
+        // 表格
+        const tableData = deviceAllArr.map(item => {
+            const obj = { device: item.name }
+            const d = lodash.find(deviceDetectedArr, { 'name': item.name })
+            const l = lodash.find(deviceLeakArr, { 'name': item.name })
+
+            obj.totalPoint = item.value
+            obj.detectedPoint = d ? d.value : 0 
+            obj.leakPoint = l ? l.value : 0
+            obj.finishRatio = obj.totalPoint ? (obj.detectedPoint / obj.totalPoint) * 100 + '%' : '0%'
+            obj.leakRatio = obj.detectedPoint ? (obj.leakPoint / obj.detectedPoint) * 100 + '%' : '0%'
+            obj.delayFix = 0
+
+            return obj
+        })
         
         const data = {
             detected: detectedArr.length,
@@ -129,7 +169,8 @@ async function allCycle (ctx, next) {
             delayFix: 0,
             unreachableCount,
             reachableCount,
-            deviceArr
+            deviceLeakArr,
+            tableData
         }
 
         ctx.body = { code: 0 , message: '获取所有周期信息成功', data }
@@ -139,17 +180,7 @@ async function allCycle (ctx, next) {
     }
 }
 
-async function deviceStatistic (ctx, next) {
-    try {
-
-    } catch (err) {
-        logger.log('deviceStatistic异常:' + err, "error")
-        ctx.body = { code: -1 , message: '获取装置统计失败' }
-    }
-}
-
 module.exports = {
     currentCycle,
     allCycle,
-    deviceStatistic
 }
