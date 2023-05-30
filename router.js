@@ -47,6 +47,7 @@ router.get('/dataPanel/sealPointType', dataPanelController.sealPointType)
 const firstPageController = require('./controller/firstPageController')
 router.get('/firstPage/currentCycle', firstPageController.currentCycle)
 router.get('/firstPage/allCycle', firstPageController.allCycle)
+router.get('/firstPage/deviceStatistic', firstPageController.deviceStatistic)
 
 // 组件管理
 const componentController = require('./controller/componentController')
