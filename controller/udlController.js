@@ -1,6 +1,7 @@
 const assignmentCollection = require('../db/assignment')
 const assignOrderCollection = require('../db/assignOrder')
 const detectLedgerCollection = require('../db/detectLedger')
+const leakLedgerCollection = require('../db/leakLedger')
 const componentCollection = require('../db/component')
 const companyCollection = require('../db/company')
 const regulationComponentCollection = require('../db/regulationComponent')
@@ -55,14 +56,17 @@ async function uploadDetectTask (ctx, next) {
             return obj
         })
 
-        // 泄漏点计算
+        // 判断是否泄漏，并记录泄漏信息
         const leakFixArr = []
         for (const item of detectData) {
             const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
             const t = lodash.find(thresholdData, { 'componentType': c.componentType, 'mediumStatus': c.mediumStatus })
 
             const detectNetWorth = item.detectValue - item.backgroundValue
-            if (detectNetWorth > t.threshold) leakFixArr.push(item.labelExpand)
+            if (detectNetWorth > t.threshold) {
+                leakFixArr.push(item.labelExpand)
+                await leakLedgerCollection.insertOne(item)
+            }
         }
 
         // 更新任务单状态

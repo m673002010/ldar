@@ -77,9 +77,6 @@ async function detectionDataLedger (ctx, next) {
             const rc = lodash.find(regulationComponentData, { 'componentType': item.componentType, 'mediumStatus': item.mediumStatus })
             Object.assign(item, { threshold: rc.threshold })
 
-            item.isLeak = item.detectValue >= item.threshold ? '是' : '否'
-            item.leakLevel = '安全'
-
             return item
         })
 
@@ -87,6 +84,9 @@ async function detectionDataLedger (ctx, next) {
             item.detectStartDate = item.startDate
             item.detectEndDate = item.endDate
             item.detectNetWorth = item.detectValue - item.backgroundValue
+
+            item.isLeak = item.detectNetWorth >= item.threshold ? '是' : '否'
+            item.leakLevel = '安全'
 
             return item
         })
@@ -195,10 +195,10 @@ async function exportDetectionDataLedger (ctx, next) {
         if (unreachable) detectData = lodash.filter(detectData, item => { return item.unreachable === unreachable })
         if (sealPointType) detectData = lodash.filter(detectData, item => { return item.sealPointType === sealPointType })
 
-        ctx.body = { code: 0 , message: '查询检测数据台账成功', data: detectData }
+        ctx.body = { code: 0 , message: '导出检测数据台账成功', data: detectData }
     } catch (err) {
         logger.log('detectionDataLedger异常:' + err, "error")
-        ctx.body = { code: -1 , message: '查询检测数据台账失败' }
+        ctx.body = { code: -1 , message: '导出检测数据台账失败' }
     }
 }
 

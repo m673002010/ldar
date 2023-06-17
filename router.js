@@ -151,7 +151,8 @@ router.get('/cpl/exportComponentPictureLedger', cplController.exportComponentPic
 
 // 泄露信息台账
 const leakInfoLedgerController = require('./controller/leakInfoLedgerController')
-router.get('/leakInfoLedger/queryLeakInfoLedger', leakInfoLedgerController.queryLeakInfoLedger)
+router.post('/leakInfoLedger/queryLeakInfoLedger', leakInfoLedgerController.queryLeakInfoLedger)
+router.post('/leakInfoLedger/exportLeakInfoLedger', leakInfoLedgerController.exportLeakInfoLedger)
 
 // 历史排放统计
 const hesController = require('./controller/hesController')
