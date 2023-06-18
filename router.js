@@ -160,6 +160,7 @@ router.get('/hes/historyEmissionStatistics', hesController.historyEmissionStatis
 router.post('/hes/addHes', hesController.addHes)
 router.post('/hes/editHes', hesController.editHes)
 router.post('/hes/deleteHes', hesController.deleteHes)
+router.post('/hes/uploadProof', hesController.uploadProof)
 
 // 排放量计算报告
 const ecrController = require('./controller/ecrController')
