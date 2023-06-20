@@ -165,6 +165,9 @@ router.post('/hes/uploadProof', hesController.uploadProof)
 // 排放量计算报告
 const ecrController = require('./controller/ecrController')
 router.get('/ecr/emissionCalculationReport', ecrController.emissionCalculationReport)
+router.post('/ecr/addEcr', ecrController.addEcr)
+router.post('/ecr/editEcr', ecrController.editEcr)
+router.post('/ecr/deleteEcr', ecrController.deleteEcr)
 
 // 仪器校准记录单
 const icrController = require('./controller/icrController')
