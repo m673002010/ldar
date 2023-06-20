@@ -9,7 +9,7 @@
     equipment: String,
     componentType: String,
     mediumStatus: String,
-    count: Number,
+    count: String,
     leakRate: String,
     createDate: Date,
     createUser: String,
