@@ -171,10 +171,10 @@ router.post('/ecr/deleteEcr', ecrController.deleteEcr)
 
 // 仪器校准记录单
 const icrController = require('./controller/icrController')
-router.get('/icr/instrumentCalibrationRecord', icrController.instrumentCalibrationRecord)
-router.post('/icr/addIcr', ecrController.addIcr)
-router.post('/icr/editIcr', ecrController.editIcr)
-router.post('/icr/deleteIcr', ecrController.deleteIcr)
+router.post('/icr/instrumentCalibrationRecord', icrController.instrumentCalibrationRecord)
+router.post('/icr/addIcr', icrController.addIcr)
+router.post('/icr/editIcr', icrController.editIcr)
+router.post('/icr/deleteIcr', icrController.deleteIcr)
 
 // 历史检测统计
 const hdsController = require('./controller/hdsController')

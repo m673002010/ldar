@@ -19,7 +19,7 @@ async function instrumentCalibrationRecord (ctx, next) {
         ctx.body = { code: 0 , message: '查询仪器校准成功', data }
     } catch (err) {
         logger.log('instrumentCalibrationRecord异常:' + err, "error")
-        ctx.body = { code: -1 , message: '查询数据失败' }
+        ctx.body = { code: -1 , message: '查询仪器校准失败' }
     }
 }
 
@@ -27,26 +27,36 @@ async function addIcr (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
         const { 
-            quarterCode = '', 
-            repairBeforeAfter = '',
-            device = '',
-            deviceType = '',
-            area = '',
-            equipment = '',
-            componentType = '',
-            mediumStatus = '',
-            count = '',
-            leakRate = '',
+            calibrationDate = '', 
+            instrument = '',
+            dailyCalibration0 = '',
+            dailyCalibration500 = '',
+            dailyCalibration10K = '',
+            driftCalibration500 = '',
+            driftCalibration10K = '',
+            isCalibration = '',
+            calibrationPeople = '',
         } = ctx.request.body
 
-        const data = { companyNum, quarterCode, repairBeforeAfter, device, deviceType, area, equipment, componentType, mediumStatus, count, leakRate }
+        const data = { 
+            companyNum, 
+            calibrationDate: new Date(calibrationDate), 
+            instrument, 
+            dailyCalibration0,
+            dailyCalibration500, 
+            dailyCalibration10K, 
+            driftCalibration500, 
+            driftCalibration10K, 
+            isCalibration, 
+            calibrationPeople
+        }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
 
         await icrCollection.insertOne(data)
         
         ctx.body = { code: 0 , message: '新增仪器校准成功' }
     } catch (err) {
-        logger.log('addEcr异常:' + err, "error")
+        logger.log('addIcr异常:' + err, "error")
         ctx.body = { code: -1 , message: '新增仪器校准失败' }
     }
 }
@@ -58,12 +68,14 @@ async function editIcr (ctx, next) {
         const { _id } = editParams
         delete editParams._id
 
+        if (editParams.calibrationDate) editParams.calibrationDate = new Date(editParams.calibrationDate)
+
         Object.assign(editParams, { editDate: new Date(), editUser: username })
         await icrCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { $set: editParams })
         
         ctx.body = { code: 0 , message: '编辑仪器校准成功' }
     } catch (err) {
-        logger.log('editEcr异常:' + err, "error")
+        logger.log('editIcr异常:' + err, "error")
         ctx.body = { code: -1 , message: '编辑仪器校准失败' }
     }
 }
@@ -78,11 +90,10 @@ async function deleteIcr (ctx, next) {
         
         ctx.body = { code: 0 , message: '删除仪器校准成功' }
     } catch (err) {
-        logger.log('deleteEcr异常:' + err, "error")
+        logger.log('deleteIcr异常:' + err, "error")
         ctx.body = { code: -1 , message: '删除仪器校准失败' }
     }
 }
-
 
 module.exports = {
     instrumentCalibrationRecord,
