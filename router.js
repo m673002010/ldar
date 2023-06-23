@@ -193,6 +193,9 @@ router.post('/ctea/deleteCtea', cteaController.deleteCtea)
 // 泄露区间分布
 const leakIntervalController = require('./controller/leakIntervalController')
 router.get('/leakInterval/queryLeakInterval', leakIntervalController.queryLeakInterval)
+router.post('/leakInterval/addLeakInterval', leakIntervalController.addLeakInterval)
+router.post('/leakInterval/editLeakInterval', leakIntervalController.editLeakInterval)
+router.post('/leakInterval/deleteLeakInterval', leakIntervalController.deleteLeakInterval)
 
 // 仪器管理
 const instrumentController = require('./controller/instrumentController')
