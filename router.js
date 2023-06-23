@@ -186,6 +186,9 @@ router.post('/hds/deleteHds', hdsController.deleteHds)
 // 组件类型排放分析
 const cteaController = require('./controller/cteaController')
 router.get('/ctea/componentTypeEmissionAnalysis', cteaController.componentTypeEmissionAnalysis)
+router.post('/ctea/addCtea', cteaController.addCtea)
+router.post('/ctea/editCtea', cteaController.editCtea)
+router.post('/ctea/deleteCtea', cteaController.deleteCtea)
 
 // 泄露区间分布
 const leakIntervalController = require('./controller/leakIntervalController')
