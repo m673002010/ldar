@@ -55,6 +55,7 @@ router.get('/component/queryImportRecord', componentController.queryImportRecord
 router.post('/component/importComponent', componentController.importComponent)
 router.post('/component/editComponent', componentController.editComponent)
 router.post('/component/deleteComponent', componentController.deleteComponent)
+router.post('/component/importComponentUni', componentController.importComponentUni)
 
 // 上传图片台账
 const pictureLedgerController = require('./controller/pictureLedgerController')
