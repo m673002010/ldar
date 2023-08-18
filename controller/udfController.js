@@ -28,8 +28,18 @@ async function uploadDetectFile (ctx, next) {
         const file = ctx.request.files.file
         const { year, quarter } = ctx.request.body
 
+        // 如果文件夹不存在，创建它
+        const folderPath = path.join(__dirname, `../static/${companyNum}/detectFile`)
+        if (!fs.existsSync(folderPath)) {
+            // 使用 recursive 选项确保创建多层嵌套目录
+            fs.mkdirSync(folderPath, { recursive: true }) 
+            logger.log(`文件夹 ${folderPath} 创建成功`)
+        } else {
+            logger.log(`文件夹 ${folderPath} 已经存在`)
+        }
+
         const reader = fs.createReadStream(file.filepath)
-        const upStream = fs.createWriteStream(path.join(__dirname, `../static/detectFile/${file.originalFilename}`))
+        const upStream = fs.createWriteStream(`${folderPath}/${file.originalFilename}`)
         reader.pipe(upStream)
 
         const detectFile = await detectFileCollection.findOne({ companyNum, fileName: file.originalFilename })
@@ -41,7 +51,7 @@ async function uploadDetectFile (ctx, next) {
                 quarter,
                 fileName: file.originalFilename, 
                 fileType: file.originalFilename.split('.')[1], 
-                filePath: `/detectFile/${file.originalFilename}` 
+                filePath: `/${companyNum}/detectFile/${file.originalFilename}` 
             }
             Object.assign(data, { createDate: new Date(), createUser: username })
             await detectFileCollection.insertOne(data)
@@ -64,11 +74,12 @@ async function deleteDetectFile (ctx, next) {
         await detectFileCollection.deleteMany({ companyNum, _id: { $in: _idArr } })
 
         for (const fileName of fileNameArr){
-            fs.unlink(`${path.join(__dirname, `../static/detectFile/${fileName}`)}`, function (error) {
+            fs.unlink(`${path.join(__dirname, `../static/${companyNum}/detectFile/${fileName}`)}`, function (error) {
                 if(error){
                     logger.log('删除检测文件失败:' + error, "error")
+                }else {
+                    logger.log('删除检测文件成功')
                 }
-                logger.log('删除检测文件成功')
             })
         }
 

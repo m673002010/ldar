@@ -62,6 +62,7 @@ const pictureLedgerController = require('./controller/pictureLedgerController')
 router.get('/pictureLedger/queryPicture', pictureLedgerController.queryPicture)
 router.post('/pictureLedger/uploadPicture', pictureLedgerController.uploadPicture)
 router.post('/pictureLedger/deletePicture', pictureLedgerController.deletePicture)
+router.post('/pictureLedger/uploadPictureUni', pictureLedgerController.uploadPictureUni)
 
 // 装置管理
 const deviceController = require('./controller/deviceController')
@@ -258,9 +259,5 @@ const idsController = require('./controller/idsController')
 router.post('/ids/importData', idsController.importData)
 router.get('/ids/instrumentDetectionStatistics', idsController.instrumentDetectionStatistics)
 router.get('/ids/deleteData', idsController.deleteData)
-
-// 静态资源
-const resourceController = require('./controller/resourceController')
-router.get('/resource/onSitePicture', resourceController.onSitePicture)
 
 module.exports = router

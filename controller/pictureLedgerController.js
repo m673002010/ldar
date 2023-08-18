@@ -26,14 +26,24 @@ async function uploadPicture (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const file = ctx.request.files.file
 
+        // 如果文件夹不存在，创建它
+        const folderPath = path.join(__dirname, `../static/${companyNum}/pictureLedger`)
+        if (!fs.existsSync(folderPath)) {
+            // 使用 recursive 选项确保创建多层嵌套目录
+            fs.mkdirSync(folderPath, { recursive: true }) 
+            logger.log(`文件夹 ${folderPath} 创建成功`)
+          } else {
+            logger.log(`文件夹 ${folderPath} 已经存在`)
+        }
+
         const reader = fs.createReadStream(file.filepath)
-        const upStream = fs.createWriteStream(path.join(__dirname, `../static/pictureLedger/${file.originalFilename}`))
+        const upStream = fs.createWriteStream(`${folderPath}/${file.originalFilename}`)
         reader.pipe(upStream)
 
         const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: file.originalFilename })
 
         if (!pictureRecord) {
-            const data = { companyNum, label: file.originalFilename.split('.')[0], picture: file.originalFilename, picturePath: `/pictureLedger/${file.originalFilename}` }
+            const data = { companyNum, label: file.originalFilename.split('.')[0], picture: file.originalFilename, picturePath: `/${companyNum}/pictureLedger/${file.originalFilename}` }
             Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
             await pictureLedgerCollection.insertOne(data)
         }
@@ -58,8 +68,9 @@ async function deletePicture (ctx, next) {
             fs.unlink(`${path.join(__dirname, `../static${picturePath}`)}`, function (error) {
                 if(error){
                     logger.log('删除图片失败:' + error, "error")
+                }else {
+                    logger.log('删除图片成功')
                 }
-                logger.log('删除图片成功')
             })
         }
         
@@ -70,8 +81,43 @@ async function deletePicture (ctx, next) {
     }
 }
 
+async function uploadPictureUni (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const file = ctx.request.files.file
+
+        // 如果文件夹不存在，创建它
+        const folderPath = path.join(__dirname, `../static/${companyNum}/pictureLedger`)
+        if (!fs.existsSync(folderPath)) {
+            // 使用 recursive 选项确保创建多层嵌套目录
+            fs.mkdirSync(folderPath, { recursive: true }) 
+            logger.log(`文件夹 ${folderPath} 创建成功`)
+        } else {
+            logger.log(`文件夹 ${folderPath} 已经存在`)
+        }
+
+        const reader = fs.createReadStream(file.filepath)
+        const upStream = fs.createWriteStream(`${folderPath}/${file.originalFilename}`)
+        reader.pipe(upStream)
+
+        const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: file.originalFilename })
+
+        if (!pictureRecord) {
+            const data = { companyNum, label: file.originalFilename.split('.')[0], picture: file.originalFilename, picturePath: `/${companyNum}/pictureLedger/${file.originalFilename}` }
+            Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
+            await pictureLedgerCollection.insertOne(data)
+        }
+
+        ctx.body = { code: 0 , message: '新增图片成功' }
+    } catch (err) {
+        logger.log('uploadPictureUni异常:' + err, "error")
+        ctx.body = { code: -1 , message: '新增图片失败' }
+    }
+}
+
 module.exports = {
     queryPicture,
     uploadPicture,
-    deletePicture
+    deletePicture,
+    uploadPictureUni
 }

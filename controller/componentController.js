@@ -3,9 +3,7 @@ const componentTypeCollection = require('../db/componentType')
 const cirCollection = require('../db/componentImportRecord')
 const { ObjectId } = require('mongodb')
 const fs = require('fs')
-const path = require('path')
 const lodash = require('lodash')
-// const xlsx = require('node-xlsx')
 const ExcelJs = require('exceljs')
 
 async function importComponent (ctx, next) {
@@ -108,8 +106,6 @@ async function importComponentUni (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const file = ctx.request.files.file
         const content = fs.readFileSync(file.filepath)
-        // const excelPath = path.join(__dirname, `../static/excel/${file.originalFilename}`)
-        // fs.writeFileSync(excelPath, content)
         const buffer = Buffer.from(content)
 
         const tableProps = {

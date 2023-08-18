@@ -93,8 +93,18 @@ async function uploadProof (ctx, next) {
         const file = ctx.request.files.file
         const { _id } = ctx.request.body
 
+        // 如果文件夹不存在，创建它
+        const folderPath = path.join(__dirname, `../static/${companyNum}/hesProof`)
+        if (!fs.existsSync(folderPath)) {
+            // 使用 recursive 选项确保创建多层嵌套目录
+            fs.mkdirSync(folderPath, { recursive: true }) 
+            logger.log(`文件夹 ${folderPath} 创建成功`)
+        } else {
+            logger.log(`文件夹 ${folderPath} 已经存在`)
+        }
+
         const reader = fs.createReadStream(file.filepath)
-        const upStream = fs.createWriteStream(path.join(__dirname, `../static/hesProof/${file.originalFilename}`))
+        const upStream = fs.createWriteStream(`${folderPath}/${file.originalFilename}`)
         reader.pipe(upStream)
 
         const hesProof = await hesProofCollection.findOne({ companyNum, hesId: _id, fileName: file.originalFilename })
@@ -105,12 +115,12 @@ async function uploadProof (ctx, next) {
                 hesId: _id,
                 fileName: file.originalFilename, 
                 fileType: file.originalFilename.split('.')[1], 
-                filePath: `/hes/${file.originalFilename}` 
+                filePath: `/${companyNum}/hesProof/${file.originalFilename}` 
             }
             Object.assign(data, { createDate: new Date(), createUser: username })
             await hesProofCollection.insertOne(data)
 
-            await hesCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { $set: { proof: file.originalFilename } })
+            await hesCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { $set: { proof: `/${companyNum}/hesProof/${file.originalFilename}` } })
         }
 
         ctx.body = { code: 0 , message: '上传验证过程成功' }

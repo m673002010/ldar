@@ -1,8 +1,5 @@
-const pictureLedgerCollection = require('../db/pictureLedger.js')
 const componentCollection = require('../db/component')
-const lodash = require('lodash')
 const compressing = require('compressing')
-const fs = require('fs')
 const path = require('path')
 
 async function componentPictureLedger (ctx, next) {
@@ -42,7 +39,8 @@ async function componentPictureLedger (ctx, next) {
 
 async function exportComponentPictureLedger (ctx, next) {
     try {
-        await compressing.zip.compressDir(path.join(__dirname, '../static/pictureLedger'), path.join(__dirname, '../static/pictureLedger.zip'))
+        const { companyNum } = ctx.userInfo
+        await compressing.zip.compressDir(path.join(__dirname, `../static/${companyNum}/pictureLedger`), path.join(__dirname, `../static/${companyNum}/pictureLedger.zip`))
         
         ctx.body = { code: 0 , message: '导出图片成功' }
     } catch (err) {
