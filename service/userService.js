@@ -136,12 +136,12 @@ async function addUser (ctx, next) {
 
 async function updateUser (ctx, next) {
     try {
-        const { userId, username, password } = ctx.request.body
+        const { userId, username, password, companyNum } = ctx.request.body
     
         const md5 = crypto.createHash('md5')
         const newPasswd = md5.update(password).digest('hex')
         
-        await userCollection.updateOne({ userId: +userId }, { $set: { username, password: newPasswd, updateTime: new Date() } })
+        await userCollection.updateOne({ userId: +userId }, { $set: { username, password: newPasswd, companyNum, updateTime: new Date() } })
         
         return { code: 0 , message: '修改成功' }
     } catch (err) {

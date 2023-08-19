@@ -54,8 +54,8 @@ async function addUser (ctx, next) {
 }
 
 async function updateUser (ctx, next) {
-    const { userId = 0, username = '', password = '' } = ctx.request.body
-    if (!userId || !username || !password) {
+    const { userId = 0, username = '', password = '', companyNum = '' } = ctx.request.body
+    if (!userId || !username || !password || !companyNum) {
         ctx.body = { code: -1, message: '参数缺失' }
         return
     }
