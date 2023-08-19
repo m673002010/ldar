@@ -21,7 +21,7 @@ async function start () {
         const rq = require('./lib/req')
         const KoaStatic = require('koa-static')
         const { checkLogin } = require('./middleware/checkLogin')
-        // const { checkRight } = require('./middleware/checkRight')
+        const { checkRight } = require('./middleware/checkRight')
         const { ctxLog } = require('./middleware/log')
         const { requestId } = require('./middleware/requestId')
 
@@ -48,7 +48,8 @@ async function start () {
 
         // 校验登录
         app.use(checkLogin)
-        // app.use(checkRight)
+        // 校验权限
+        app.use(checkRight)
 
         app.use(async (ctx, next) => {
             ctx.rq = rq

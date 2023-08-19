@@ -1,5 +1,6 @@
 const regulationCollection = require('../db/regulation.js')
 const regulationComponentCollection = require('../db/regulationComponent.js')
+const companyCollection = require('../db/company')
 const lodash = require('lodash')
 const { ObjectId } = require('mongodb')
 
@@ -128,6 +129,33 @@ async function deleteRegulationComponent (ctx, next) {
     }
 }
 
+async function bindRegulation (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const { regulationCode, regulation, unreachableCalculation } = ctx.request.body
+
+        await companyCollection.updateOne({ companyNum }, { $set: { regulationCode, regulation, unreachableCalculation, editDate: new Date(), editUser: username } })
+
+        ctx.body =  { code: 0 , message: '绑定法规成功' }
+    } catch (err) {
+        logger.log('bindRegulation异常:' + err, 'error')
+        ctx.body =  { code: -1 , message: '绑定法规失败' }
+    }
+}
+
+async function getBindRegulation (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+
+        const data = await companyCollection.findOne({ companyNum })
+
+        ctx.body =  { code: 0 , message: '查询绑定法规成功', data }
+    } catch (err) {
+        logger.log('getBindRegulation异常:' + err, 'error')
+        ctx.body =  { code: -1 , message: '查询绑定法规失败' }
+    }
+}
+
 async function validate (ctx, next) {
     try {
     } catch (err) {
@@ -146,6 +174,9 @@ module.exports = {
     addRegulationComponent,
     editRegulationComponent,
     deleteRegulationComponent,
+
+    bindRegulation,
+    getBindRegulation,
 
     validate
 }

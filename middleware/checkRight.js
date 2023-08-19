@@ -8,7 +8,18 @@ async function checkRight (ctx, next) {
         // const arr = ['/user/login', '/user/logout', '/user/register', '/company/companyInfo', 
         // '/company/searchCompany', '/user/userInfo']
 
-        const arr = ['/user/login', '/user/logout', '/user/register']
+        const arr = [
+            '/user/login', 
+            '/user/logout', 
+            '/user/register', 
+            '/company/companyInfo', 
+            '/user/reToken',
+            '/firstPage/currentCycle',
+            '/firstPage/allCycle',
+            '/dataPanel/pointStatic',
+            '/dataPanel/componentType',
+            '/dataPanel/sealPointType'
+        ]
 
         if (arr.includes(ctx.path)) await next()
         else {
@@ -20,12 +31,12 @@ async function checkRight (ctx, next) {
             const rights = await rightCollection.find({ rightId: { $in: rightIds } }).toArray()
             const avaluePaths = lodash.map(rights, 'path')
     
-            await next()
-            // if (avaluePaths.includes(ctx.path)) await next()
-            // else {       
-            //     ctx.body = { code: -1, message: `无${ctx.path}权限` }
-            //     return
-            // }
+            // await next()
+            if (avaluePaths.includes(ctx.path)) await next()
+            else {       
+                ctx.body = { code: -1, message: `无${ctx.path}权限` }
+                return
+            }
         }
     } catch (err) {
         console.log('checkRight异常:', err)

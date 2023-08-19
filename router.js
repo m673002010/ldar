@@ -37,9 +37,6 @@ router.get('/company/queryCompany', companyController.queryCompany)
 router.post('/company/addCompany', companyController.addCompany)
 router.post('/company/editCompany', companyController.editCompany)
 router.post('/company/deleteCompany', companyController.deleteCompany)
-router.get('/company/dataPanel', companyController.dataPanel)
-router.get('/company/getBindRegulation', companyController.getBindRegulation)
-router.post('/company/bindRegulation', companyController.bindRegulation)
 
 // 数据面板
 const dataPanelController = require('./controller/dataPanelController')
@@ -52,13 +49,10 @@ const firstPageController = require('./controller/firstPageController')
 router.get('/firstPage/currentCycle', firstPageController.currentCycle)
 router.get('/firstPage/allCycle', firstPageController.allCycle)
 
-// 组件管理
+// 上传组件台账
 const componentController = require('./controller/componentController')
-router.get('/component/queryComponent', componentController.queryComponent)
 router.get('/component/queryImportRecord', componentController.queryImportRecord)
 router.post('/component/importComponent', componentController.importComponent)
-router.post('/component/editComponent', componentController.editComponent)
-router.post('/component/deleteComponent', componentController.deleteComponent)
 router.post('/component/importComponentUni', componentController.importComponentUni)
 
 // 上传图片台账
@@ -67,6 +61,11 @@ router.get('/pictureLedger/queryPicture', pictureLedgerController.queryPicture)
 router.post('/pictureLedger/uploadPicture', pictureLedgerController.uploadPicture)
 router.post('/pictureLedger/deletePicture', pictureLedgerController.deletePicture)
 router.post('/pictureLedger/uploadPictureUni', pictureLedgerController.uploadPictureUni)
+
+// 组件管理
+router.get('/component/queryComponent', componentController.queryComponent)
+router.post('/component/editComponent', componentController.editComponent)
+router.post('/component/deleteComponent', componentController.deleteComponent)
 
 // 装置管理
 const deviceController = require('./controller/deviceController')
@@ -100,6 +99,9 @@ router.get('/regulation/getRegulationComponent', regulationController.getRegulat
 router.post('/regulation/addRegulationComponent', regulationController.addRegulationComponent)
 router.post('/regulation/editRegulationComponent', regulationController.editRegulationComponent)
 router.post('/regulation/deleteRegulationComponent', regulationController.deleteRegulationComponent)
+
+router.get('/regulation/getBindRegulation', regulationController.getBindRegulation)
+router.post('/regulation/bindRegulation', regulationController.bindRegulation)
 
 router.post('/regulation/validate', regulationController.validate)
 
@@ -168,6 +170,13 @@ router.post('/hes/editHes', hesController.editHes)
 router.post('/hes/deleteHes', hesController.deleteHes)
 router.post('/hes/uploadProof', hesController.uploadProof)
 
+// 历史检测统计
+const hdsController = require('./controller/hdsController')
+router.get('/hds/historyDetectionStatistics', hdsController.historyDetectionStatistics)
+router.post('/hds/addHds', hdsController.addHds)
+router.post('/hds/editHds', hdsController.editHds)
+router.post('/hds/deleteHds', hdsController.deleteHds)
+
 // 排放量计算报告
 const ecrController = require('./controller/ecrController')
 router.get('/ecr/emissionCalculationReport', ecrController.emissionCalculationReport)
@@ -181,13 +190,6 @@ router.post('/icr/instrumentCalibrationRecord', icrController.instrumentCalibrat
 router.post('/icr/addIcr', icrController.addIcr)
 router.post('/icr/editIcr', icrController.editIcr)
 router.post('/icr/deleteIcr', icrController.deleteIcr)
-
-// 历史检测统计
-const hdsController = require('./controller/hdsController')
-router.get('/hds/historyDetectionStatistics', hdsController.historyDetectionStatistics)
-router.post('/hds/addHds', hdsController.addHds)
-router.post('/hds/editHds', hdsController.editHds)
-router.post('/hds/deleteHds', hdsController.deleteHds)
 
 // 组件类型排放分析
 const cteaController = require('./controller/cteaController')
