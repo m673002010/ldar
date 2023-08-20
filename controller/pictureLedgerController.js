@@ -85,6 +85,7 @@ async function uploadPictureUni (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
         const file = ctx.request.files.file
+        const { imgName } = ctx.request.body
 
         // 如果文件夹不存在，创建它
         const folderPath = path.join(__dirname, `../static/${companyNum}/pictureLedger`)
@@ -96,14 +97,22 @@ async function uploadPictureUni (ctx, next) {
             logger.log(`文件夹 ${folderPath} 已经存在`)
         }
 
+        const suffix = file.originalFilename.split('.')[1]
+        let fileName = ''
+        if (imgName) {
+            fileName = imgName + '.' + suffix
+        } else {
+            fileName = file.originalFilename
+        }
+
         const reader = fs.createReadStream(file.filepath)
-        const upStream = fs.createWriteStream(`${folderPath}/${file.originalFilename}`)
+        const upStream = fs.createWriteStream(`${folderPath}/${fileName}`)
         reader.pipe(upStream)
 
-        const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: file.originalFilename })
+        const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: fileName })
 
         if (!pictureRecord) {
-            const data = { companyNum, label: file.originalFilename.split('.')[0], picture: file.originalFilename, picturePath: `/${companyNum}/pictureLedger/${file.originalFilename}` }
+            const data = { companyNum, label: fileName.split('.')[0], picture: fileName, picturePath: `/${companyNum}/pictureLedger/${fileName}` }
             Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
             await pictureLedgerCollection.insertOne(data)
         }
