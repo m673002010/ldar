@@ -20,6 +20,7 @@ async function start () {
         // const bodyParser = require('koa-bodyparser')
         const rq = require('./lib/req')
         const KoaStatic = require('koa-static')
+        const KoaMount = require('koa-mount')
         const { checkLogin } = require('./middleware/checkLogin')
         const { checkRight } = require('./middleware/checkRight')
         const { ctxLog } = require('./middleware/log')
@@ -44,7 +45,8 @@ async function start () {
             await next()
         })
 
-        app.use(KoaStatic(path.join(__dirname, './static')))
+        // app.use(KoaStatic(path.join(__dirname, './static')))
+        app.use(KoaMount('/api', KoaStatic(path.join(__dirname, './static'))))
 
         // 校验登录
         app.use(checkLogin)

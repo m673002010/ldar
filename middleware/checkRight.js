@@ -5,20 +5,17 @@ const lodash = require('lodash')
 
 async function checkRight (ctx, next) {
     try {
-        // const arr = ['/user/login', '/user/logout', '/user/register', '/company/companyInfo', 
-        // '/company/searchCompany', '/user/userInfo']
-
         const arr = [
-            '/user/login', 
-            '/user/logout', 
-            '/user/register', 
-            '/company/companyInfo', 
-            '/user/reToken',
-            '/firstPage/currentCycle',
-            '/firstPage/allCycle',
-            '/dataPanel/pointStatic',
-            '/dataPanel/componentType',
-            '/dataPanel/sealPointType'
+            '/api/user/login', 
+            '/api/user/logout', 
+            // '/api/user/register', 
+            '/api/company/companyInfo', 
+            '/api/user/reToken',
+            '/api/firstPage/currentCycle',
+            '/api/firstPage/allCycle',
+            '/api/dataPanel/pointStatic',
+            '/api/dataPanel/componentType',
+            '/api/dataPanel/sealPointType'
         ]
 
         if (arr.includes(ctx.path)) await next()
