@@ -1,6 +1,9 @@
 const componentCollection = require('../db/component')
 const componentTypeCollection = require('../db/componentType')
 const cirCollection = require('../db/componentImportRecord')
+const deviceCollection = require('../db/device')
+const areaCollection = require('../db/area')
+const equipmentCollection = require('../db/equipment')
 const { ObjectId } = require('mongodb')
 const fs = require('fs')
 const lodash = require('lodash')
@@ -11,16 +14,14 @@ async function importComponent (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const { importData = [], importFile = '' } = ctx.request.body
 
-        const fileData = { companyNum, importFile, username, newCount: importData.length, createDate: new Date(), createUser: username }
-        await cirCollection.insertOne(fileData)
-
-        // 组件表补充密封点类型字段
+        // 补充密封点类型字段
         const sealPointTypeMap = {}
         const componentTypeArr = await componentTypeCollection.find().toArray()
         for (const c of componentTypeArr) {
             sealPointTypeMap[c.componentType] = c.sealPointType
         }
 
+        // 导入组件数据，排除重复上传的组件
         const data = importData.map(item => {
             Object.assign(item, { companyNum })
             item.labelExpand = item.label + '-' + item.expand
@@ -28,7 +29,66 @@ async function importComponent (ctx, next) {
 
             return item
         })
-        await componentCollection.insertMany(data)
+
+        const oldData = await componentCollection.find({ companyNum }).toArray()
+
+        const labelExpands = lodash.map(data, 'labelExpand')
+        const oldLabelExpands = lodash.map(oldData, 'labelExpand')
+        const newLabelExpands = lodash.difference(labelExpands, oldLabelExpands)
+
+        const newData = newLabelExpands.map(nle => {
+            const item = lodash.find(data, { 'labelExpand': nle })
+
+            return item
+        })
+
+        // 没有新增组件提前返回
+        if (!newData || newData.length === 0) {
+            ctx.body = { code: 0 , message: '没有可导入的新组件' }
+            return
+        }
+
+        await componentCollection.insertMany(newData).catch(err =>{
+            logger.log('组件新增异常:' + err.message, "error")
+            ctx.body = { code: -1 , message: '组件新增失败' }
+            return
+        })
+
+        // 记录组件新增条数
+        const fileData = { companyNum, importFile, username, newCount: newData.length, createDate: new Date(), createUser: username }
+        await cirCollection.insertOne(fileData)
+
+        // 提取新的装置、区域、设备数据，添加至数据库
+        const devices = []
+        const areas = []
+        const equipments = []
+        for (let item of newData) {
+            devices.push({ deviceNum: item.deviceNum, device: item.device })
+            areas.push({ areaNum: item.areaNum, area: item.area, deviceNum: item.deviceNum, device: item.device })
+            equipments.push({ equipmentNum: item.equipmentNum, equipment: item.equipment, areaNum: item.areaNum, area: item.area, deviceNum: item.deviceNum, device: item.device })
+        }
+
+        const deviceData = await deviceCollection.find({ companyNum }).toArray()
+        const areaData = await areaCollection.find({ companyNum }).toArray()
+        const equipmentData = await equipmentCollection.find({ companyNum }).toArray()
+
+        let newDevices = lodash.filter(devices, d => !lodash.find(deviceData, { deviceNum: d.deviceNum, device: d.device }))
+        let newAreas = lodash.filter(areas, a => !lodash.find(areaData, { areaNum: a.areaNum, area: a.area, deviceNum: a.deviceNum, device: a.device }))
+        let newEquipments = lodash.filter(equipments, e => !lodash.find(equipmentData, { equipmentNum: e.equipmentNum, equipment: e.equipment, areaNum: e.areaNum, area: e.area, deviceNum: e.deviceNum, device: e.device }))
+
+        newDevices = newDevices.map(item => {
+            return Object.assign(item, { companyNum, createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
+        } )
+        newAreas = newAreas.map(item => {
+            return Object.assign(item, { companyNum, createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
+        } )
+        newEquipments = newEquipments.map(item => {
+            return Object.assign(item, { companyNum, createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
+        } )
+
+        if (newDevices && newDevices.length) await deviceCollection.insertMany(newDevices)
+        if (newAreas && newAreas.length) await areaCollection.insertMany(newAreas)
+        if (newEquipments && newEquipments.length) await equipmentCollection.insertMany(newEquipments)
 
         ctx.body = { code: 0 , message: '导入组件成功' }
     } catch (err) {
@@ -138,7 +198,7 @@ async function importComponentUni (ctx, next) {
             '原始图片': 'picture',
             '标点图片': 'markPicture',
             '标点位置': 'markPosition',
-            '时间戳': 'timestamp'
+            // '时间戳': 'timestamp'
         }
 
         const excelData = await readExcel(buffer)
