@@ -56,6 +56,51 @@ async function uploadPicture (ctx, next) {
     }
 }
 
+async function updatePicture (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const file = ctx.request.files.file
+        const { _id } = ctx.request.body
+
+        const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, _id: ObjectId(_id) })
+
+        if (pictureRecord) {
+            const oldPicturePath = path.join(__dirname, `../static${pictureRecord.picturePath}`)
+            const folderPath = oldPicturePath.split('/').slice(0, oldPicturePath.split('/').length - 1).join('/')
+            fs.unlink(oldPicturePath, function (error) {
+                if(error){
+                    logger.log('删除旧图片失败:' + error, "error")
+                }else {
+                    logger.log('删除旧图片成功')
+                }
+            })
+
+            const reader = fs.createReadStream(file.filepath)
+            const upStream = fs.createWriteStream(`${folderPath}/${file.originalFilename}`)
+            reader.pipe(upStream)
+
+            const newPicturePath = '/' + companyNum + `${folderPath}/${file.originalFilename}`.split(`${companyNum}`)[1]
+
+            console.log(newPicturePath)
+
+            await pictureLedgerCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { $set: { 
+                label: file.originalFilename.split('.')[0], 
+                picture: file.originalFilename, 
+                picturePath: newPicturePath,
+                editDate: new Date(), 
+                editUser: username
+            }})
+
+            ctx.body = { code: 0 , message: '修改图片成功' }
+        } else {
+            ctx.body = { code: 0 , message: '修改图片失败' }
+        }
+    } catch (err) {
+        logger.log('updatePicture异常:' + err, "error")
+        ctx.body = { code: -1 , message: '修改图片失败' }
+    }
+}
+
 async function deletePicture (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
@@ -208,6 +253,7 @@ function getAllFilePaths(dirPath, fileArray) {
 module.exports = {
     queryPicture,
     uploadPicture,
+    updatePicture,
     deletePicture,
     uploadPictureUni,
     uploadPicArchive

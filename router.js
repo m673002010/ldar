@@ -59,6 +59,7 @@ router.post('/api/component/importComponentUni', componentController.importCompo
 const pictureLedgerController = require('./controller/pictureLedgerController')
 router.get('/api/pictureLedger/queryPicture', pictureLedgerController.queryPicture)
 router.post('/api/pictureLedger/uploadPicture', pictureLedgerController.uploadPicture)
+router.post('/api/pictureLedger/updatePicture', pictureLedgerController.updatePicture)
 router.post('/api/pictureLedger/deletePicture', pictureLedgerController.deletePicture)
 router.post('/api/pictureLedger/uploadPictureUni', pictureLedgerController.uploadPictureUni)
 router.post('/api/pictureLedger/uploadPicArchive', pictureLedgerController.uploadPicArchive)
