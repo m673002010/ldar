@@ -61,6 +61,7 @@ router.get('/api/pictureLedger/queryPicture', pictureLedgerController.queryPictu
 router.post('/api/pictureLedger/uploadPicture', pictureLedgerController.uploadPicture)
 router.post('/api/pictureLedger/deletePicture', pictureLedgerController.deletePicture)
 router.post('/api/pictureLedger/uploadPictureUni', pictureLedgerController.uploadPictureUni)
+router.post('/api/pictureLedger/uploadPicArchive', pictureLedgerController.uploadPicArchive)
 
 // 组件管理
 router.get('/api/component/queryComponent', componentController.queryComponent)

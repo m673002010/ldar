@@ -3,6 +3,7 @@ const lodash = require('lodash')
 const fs = require('fs')
 const path = require('path')
 const { ObjectId } = require('mongodb')
+const compressing = require('compressing')
 
 async function queryPicture (ctx, next) {
     try {
@@ -124,9 +125,90 @@ async function uploadPictureUni (ctx, next) {
     }
 }
 
+async function uploadPicArchive (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const file = ctx.request.files.file
+
+        // 如果文件夹不存在，创建它
+        const folderPath = path.join(__dirname, `../static/${companyNum}/pictureLedger`)
+        if (!fs.existsSync(folderPath)) {
+            // 使用 recursive 选项确保创建多层嵌套目录
+            fs.mkdirSync(folderPath, { recursive: true }) 
+            logger.log(`文件夹 ${folderPath} 创建成功`)
+          } else {
+            logger.log(`文件夹 ${folderPath} 已经存在`)
+        }
+
+        // 解压压缩包
+        const content = fs.readFileSync(file.filepath)
+        fs.writeFileSync(`${folderPath}/${file.originalFilename}`, content)
+        await compressing.zip.uncompress(`${folderPath}/${file.originalFilename}`, folderPath, {
+            zipFileNameEncoding: 'GBK'
+        })
+
+        // 删除压缩包
+        fs.unlink(`${folderPath}/${file.originalFilename}`,(err) => {
+            if (err) {
+                logger.log(`删除压缩包 ${folderPath}/${file.originalFilename} 失败`)
+            } else {
+                logger.log(`删除压缩包 ${folderPath}/${file.originalFilename} 成功`)
+            }
+        })
+
+        // 获取图片的绝对路径，截取公司文件夹下的路径
+        const pictureFolder = `${folderPath}/${file.originalFilename.split('.')[0]}`
+        const picPaths = getAllFilePaths(pictureFolder)
+        const picInfos = picPaths.map(item => {
+            const obj = {}
+            obj.picturePath = '/' + companyNum + item.split(companyNum)[1]
+            obj.picture = obj.picturePath.split('/').pop()
+            obj.label = obj.picture.split('.')[0]
+
+            return obj
+        })
+
+        // 更新图片信息至数据库
+        for (const pic of picInfos) {
+            const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: pic.picture })
+
+            if (!pictureRecord) {
+                const data = { companyNum, label: pic.label, picture: pic.picture, picturePath: pic.picturePath }
+                Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
+                await pictureLedgerCollection.insertOne(data)
+            }
+        }
+
+        ctx.body = { code: 0 , message: '上传图片压缩包成功' }
+    } catch (err) {
+        logger.log('uploadPicArchive异常:' + err, "error")
+        ctx.body = { code: -1 , message: '上传图片压缩包失败' }
+    }
+}
+
+function getAllFilePaths(dirPath, fileArray) {
+    const files = fs.readdirSync(dirPath)
+  
+    fileArray = fileArray || []
+  
+    files.forEach(file => {
+        const filePath = path.join(dirPath, file)
+        const stats = fs.statSync(filePath)
+  
+        if (stats.isFile()) {
+            fileArray.push(filePath)
+        } else if (stats.isDirectory()) {
+            getAllFilePaths(filePath, fileArray)
+        }
+    })
+  
+    return fileArray
+}
+
 module.exports = {
     queryPicture,
     uploadPicture,
     deletePicture,
-    uploadPictureUni
+    uploadPictureUni,
+    uploadPicArchive
 }
