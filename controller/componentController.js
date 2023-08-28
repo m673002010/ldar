@@ -58,20 +58,27 @@ async function importComponent (ctx, next) {
         const fileData = { companyNum, importFile, username, newCount: newData.length, createDate: new Date(), createUser: username }
         await cirCollection.insertOne(fileData)
 
-        // 提取新的装置、区域、设备数据，添加至数据库
-        const devices = []
-        const areas = []
-        const equipments = []
+        // 添加装置、区域、设备数据至数据库
+        let devices = []
+        let areas = []
+        let equipments = []
         for (let item of newData) {
             devices.push({ deviceNum: item.deviceNum, device: item.device })
             areas.push({ areaNum: item.areaNum, area: item.area, deviceNum: item.deviceNum, device: item.device })
             equipments.push({ equipmentNum: item.equipmentNum, equipment: item.equipment, areaNum: item.areaNum, area: item.area, deviceNum: item.deviceNum, device: item.device })
         }
 
+        // 去除重复
+        devices = lodash.uniqWith(devices, lodash.isEqual)
+        areas = lodash.uniqWith(areas, lodash.isEqual)
+        equipments = lodash.uniqWith(equipments, lodash.isEqual)
+        
+        // 数据库已有
         const deviceData = await deviceCollection.find({ companyNum }).toArray()
         const areaData = await areaCollection.find({ companyNum }).toArray()
         const equipmentData = await equipmentCollection.find({ companyNum }).toArray()
 
+        // 筛选出新的装置、区域、设备数据
         let newDevices = lodash.filter(devices, d => !lodash.find(deviceData, { deviceNum: d.deviceNum, device: d.device }))
         let newAreas = lodash.filter(areas, a => !lodash.find(areaData, { areaNum: a.areaNum, area: a.area, deviceNum: a.deviceNum, device: a.device }))
         let newEquipments = lodash.filter(equipments, e => !lodash.find(equipmentData, { equipmentNum: e.equipmentNum, equipment: e.equipment, areaNum: e.areaNum, area: e.area, deviceNum: e.deviceNum, device: e.device }))

@@ -48,7 +48,7 @@ async function uploadDetectTask (ctx, next) {
         // 检测点对应的组件
         const componentData = await componentCollection.find({ labelExpand: { $in: detectLabelExpandArr } }).toArray()
 
-        // 组件阈值
+        // 组件的阈值
         const regulationCode = (await companyCollection.findOne({ companyNum })).regulationCode
         const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
         const thresholdData = regulationComponentData.map(item => {
@@ -56,20 +56,22 @@ async function uploadDetectTask (ctx, next) {
             return obj
         })
 
-        // 判断是否泄漏，并记录泄漏信息
+        // 检测值-背景值，是否大于组件的阈值，判断是否泄漏，并记录泄漏信息
         const leakFixArr = []
         for (const item of detectData) {
             const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
             const t = lodash.find(thresholdData, { 'componentType': c.componentType, 'mediumStatus': c.mediumStatus })
 
             const detectNetWorth = item.detectValue - item.backgroundValue
+
+            // 泄漏
             if (detectNetWorth > t.threshold) {
                 leakFixArr.push(item.labelExpand)
                 await leakLedgerCollection.insertOne(item)
             }
         }
 
-        // 更新任务单状态
+        // 更新任务单状态为完成
         await assignOrderCollection.updateOne({ companyNum, quarterCode, assignNum }, { 
             $set: {
                 detectedArr: detectLabelExpandArr,
@@ -78,7 +80,7 @@ async function uploadDetectTask (ctx, next) {
             }
         })
 
-        // 避免重复上传，先删除旧台账
+        // 避免重复上传，先删除旧检测台账
         await detectLedgerCollection.deleteMany({ companyNum, quarterCode, assignNum })
         // 新增检测任务台账
         await detectLedgerCollection.insertMany(detectData)

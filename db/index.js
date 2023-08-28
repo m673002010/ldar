@@ -6,12 +6,12 @@ async function connectDb() {
     const client = new MongoClient(config.mongodbUrl)
     
     const res = await client.connect().catch(err => { 
-        console.log('Connected mongodb fail', err)
+        logger.log('Connected mongodb fail', err)
         return null
     })
     if (!res) return null
 
-    console.log('Connected successfully to mongodb')
+    logger.log('Connected successfully to mongodb')
     mongoDb = client.db('ldar')
   
     return 'ok'

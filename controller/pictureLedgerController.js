@@ -81,8 +81,6 @@ async function updatePicture (ctx, next) {
 
             const newPicturePath = '/' + companyNum + `${folderPath}/${file.originalFilename}`.split(`${companyNum}`)[1]
 
-            console.log(newPicturePath)
-
             await pictureLedgerCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { $set: { 
                 label: file.originalFilename.split('.')[0], 
                 picture: file.originalFilename, 

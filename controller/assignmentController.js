@@ -47,6 +47,7 @@ async function addAssignment (ctx, next) {
         const { companyNum, username } = ctx.userInfo
         const { year = '', quarter = '', detectType } = ctx.request.body
 
+        // 拼接检测周期编号
         const quarterCode = year + '-' + quarterMap[quarter]
         const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
 
@@ -147,7 +148,7 @@ async function queryNoAssign (ctx, next) {
 async function assign (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { quarterCode = '', assignNum = '', detectPeople = '', assignPoint = '' } = ctx.request.body
+        const { quarterCode = '', assignNum = '', detectPeople = '', assignPoint = 0 } = ctx.request.body
 
         // 获取未分配
         let { assignedArr, labelExpandArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
@@ -194,10 +195,57 @@ async function assign (ctx, next) {
     }
 }
 
+async function pick (ctx, next) {
+    try {
+        const { companyNum, username } = ctx.userInfo
+        const { pickData = [], quarterCode = '', assignNum = '', detectPeople = '' } = ctx.request.body
+
+        // 挑选分配的点
+        const assignArr = lodash.map(pickData, item => { return item.label + '-' + item.expand })
+
+        // 未分配的点
+        let { assignedArr } = await assignmentCollection.findOne({ companyNum, quarterCode })
+
+        // 分配
+        assignedArr = assignedArr.concat(assignArr)
+
+        const year = quarterCode.split('-')[0]
+        const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
+
+        // 新增任务单
+        const data = {
+            companyNum,
+            quarterCode, 
+            assignNum, 
+            detectPeople,
+            assignedArr: assignArr, 
+            detectedArr: [],
+            leakFixArr: [], 
+            isFinished: '否',
+            startDate: year + '-' + dateMap[quarterStr].start,
+            endDate: year + '-' + dateMap[quarterStr].end,
+            createDate: new Date(),
+            createUser: username
+        }
+
+        await assignOrderCollection.insertOne(data)
+
+        // 更新检测周期
+        await assignmentCollection.updateOne({ companyNum, quarterCode }, { $set: { assignedArr } })
+
+        ctx.body = { code: 0 , message: '分配任务成功' }
+    } catch (err) {
+        logger.log('assign异常:' + err, "error")
+        ctx.body = { code: -1 , message: '分配任务失败' }
+    }
+}
+
 async function deleteAssign (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
+
+        // 获得删除的任务单号
         const quarterCode = lodash.map(deleteData, 'quarterCode')[0]
         const assignNumArr = lodash.map(deleteData, 'assignNum')
 
@@ -257,6 +305,7 @@ module.exports = {
     deleteAssignment,
     queryNoAssign,
     assign,
+    pick,
     deleteAssign,
     queryAssignDetail,
 }

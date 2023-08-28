@@ -202,7 +202,6 @@ async function isAdmin (ctx, next) {
         const userInfo = ctx.userInfo
 
         const user = await userCollection.findOne({ userId: +userInfo.userId })
-        console.log('user', user)
         const admin = user.companyNum === 'all' ? 1 : 0
         
         return { code: 0 , message: '判断管理员成功', data: admin }

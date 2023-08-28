@@ -100,8 +100,6 @@ async function deleteStandardGas (ctx, next) {
         const { deleteData } = ctx.request.body
         const standardGasNumArr = lodash.map(deleteData, 'standardGasNum')
 
-        console.log(companyNum, standardGasNumArr)
-
         await standardGasCollection.deleteMany({ companyNum, standardGasNum: { $in: standardGasNumArr } })
         
         ctx.body = { code: 0 , message: '删除标准气成功' }
