@@ -174,45 +174,69 @@ async function uploadPicArchive (ctx, next) {
         const file = ctx.request.files.file
 
         // 如果文件夹不存在，创建它
-        const folderPath = path.join(__dirname, `../static/${companyNum}/pictureLedger`)
-        if (!fs.existsSync(folderPath)) {
+        const pictureLedgerPath = path.join(__dirname, `../static/${companyNum}/pictureLedger`)
+        if (!fs.existsSync(pictureLedgerPath)) {
             // 使用 recursive 选项确保创建多层嵌套目录
-            fs.mkdirSync(folderPath, { recursive: true }) 
-            logger.log(`文件夹 ${folderPath} 创建成功`)
+            fs.mkdirSync(pictureLedgerPath, { recursive: true }) 
+            logger.log(`文件夹 ${pictureLedgerPath} 创建成功`)
           } else {
-            logger.log(`文件夹 ${folderPath} 已经存在`)
+            logger.log(`文件夹 ${pictureLedgerPath} 已经存在`)
         }
 
-        // 解压压缩包
+        // 压缩包路径
+        zipFilePath = `${pictureLedgerPath}/${file.originalFilename}`
+        // 后缀
+        const suffix = file.originalFilename.split('.')[1]
+        // 解压文件夹路径
+        unzipFolderPath = `${pictureLedgerPath}/${file.originalFilename.split('.')[0]}`
+
+        // 根据压缩格式，解压压缩包
         const content = fs.readFileSync(file.filepath)
-        fs.writeFileSync(`${folderPath}/${file.originalFilename}`, content)
-        await compressing.zip.uncompress(`${folderPath}/${file.originalFilename}`, folderPath, {
+        fs.writeFileSync(zipFilePath, content)
+        await compressing[suffix].uncompress(zipFilePath, pictureLedgerPath, {
             zipFileNameEncoding: 'GBK'
         })
 
+        // 将解压文件夹的文件移至上一级目录
+        const pictureInfoArr = []
+        const pictures = fs.readdirSync(unzipFolderPath)
+        for (const pic of pictures) {
+            fs.rename(`${unzipFolderPath}/${pic}`, `${pictureLedgerPath}/${pic}`, (err) => {
+                if (err) {
+                    logger.log('移动文件时出错', err)
+                } else {
+                    logger.log('文件移动成功')
+                }
+            })
+
+            const obj = {}
+            obj.picturePath = '/' + companyNum + `${pictureLedgerPath}/${pic}`.split(companyNum)[1]
+            obj.picture = pic
+            obj.label = pic.split('.')[0]
+
+            pictureInfoArr.push(obj)
+        }
+
         // 删除压缩包
-        fs.unlink(`${folderPath}/${file.originalFilename}`,(err) => {
+        fs.unlink(zipFilePath,(err) => {
             if (err) {
-                logger.log(`删除压缩包 ${folderPath}/${file.originalFilename} 失败`)
+                logger.log(`删除压缩包${zipFilePath}失败`)
             } else {
-                logger.log(`删除压缩包 ${folderPath}/${file.originalFilename} 成功`)
+                logger.log(`删除压缩包${zipFilePath}成功`)
             }
         })
 
-        // 获取图片的绝对路径，截取公司文件夹下的路径
-        const pictureFolder = `${folderPath}/${file.originalFilename.split('.')[0]}`
-        const picPaths = getAllFilePaths(pictureFolder)
-        const picInfos = picPaths.map(item => {
-            const obj = {}
-            obj.picturePath = '/' + companyNum + item.split(companyNum)[1]
-            obj.picture = obj.picturePath.split('/').pop()
-            obj.label = obj.picture.split('.')[0]
-
-            return obj
+        // 删除解压文件夹
+        fs.rmdir(unzipFolderPath,(err) => {
+            if (err) {
+                logger.log(`删除解压文件夹${unzipFolderPath}失败`)
+            } else {
+                logger.log(`删除解压文件夹${unzipFolderPath}成功`)
+            }
         })
 
         // 更新图片信息至数据库
-        for (const pic of picInfos) {
+        for (const pic of pictureInfoArr) {
             const pictureRecord = await pictureLedgerCollection.findOne({ companyNum, picture: pic.picture })
 
             if (!pictureRecord) {
