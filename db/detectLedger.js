@@ -12,7 +12,7 @@
 	detectDate: Date,
 	startDate: Date,
 	endDate: Date,
-	runTime: String,
+	// runTime: String,
 	detectPeople: String,
 	instrument: String,
 	backgroundValue: String,

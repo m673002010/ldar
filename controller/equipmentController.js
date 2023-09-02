@@ -1,5 +1,6 @@
 const equipmentCollection = require('../db/equipment.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryEquipment (ctx, next) {
     try {
@@ -41,11 +42,11 @@ async function addEquipment (ctx, next) {
 async function editEquipment (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { equipmentNum = '', equipment = '', deviceNum = '', device = '', areaNum = '', area = '' } = ctx.request.body
+        const { _id, equipmentNum = '', equipment = '', deviceNum = '', device = '', areaNum = '', area = '' } = ctx.request.body
 
-        await equipmentCollection.updateOne({ companyNum, equipmentNum }, { 
+        await equipmentCollection.updateOne({ _id: ObjectId(_id) }, { 
             $set: { 
-                equipment, deviceNum, device, areaNum, area, editDate: new Date(), editUser: username 
+                equipmentNum, equipment, deviceNum, device, areaNum, area, editDate: new Date(), editUser: username 
             } 
         })
         
@@ -60,9 +61,9 @@ async function deleteEquipment (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const equipmentNumArr = lodash.map(deleteData, 'equipmentNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await equipmentCollection.deleteMany({ companyNum, equipmentNum: { $in: equipmentNumArr } })
+        await equipmentCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除设备成功' }
     } catch (err) {

@@ -1,5 +1,6 @@
 const deviceCollection = require('../db/device.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryDevice (ctx, next) {
     try {
@@ -40,9 +41,9 @@ async function addDevice (ctx, next) {
 async function editDevice (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { deviceNum = '', device = '', deviceType = '', department = '' } = ctx.request.body
+        const { _id, deviceNum = '', device = '', deviceType = '', department = '' } = ctx.request.body
 
-        await deviceCollection.updateOne({ companyNum, deviceNum }, { $set: { device, deviceType, department, editDate: new Date(), editUser: username } })
+        await deviceCollection.updateOne({ _id: ObjectId(_id) }, { $set: { device, deviceType, department, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑装置成功' }
     } catch (err) {
@@ -55,9 +56,9 @@ async function deleteDevice (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const deviceNumArr = lodash.map(deleteData, 'deviceNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await deviceCollection.deleteMany({ companyNum, deviceNum: { $in: deviceNumArr } })
+        await deviceCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除装置成功' }
     } catch (err) {

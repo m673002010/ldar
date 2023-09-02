@@ -139,6 +139,7 @@ router.post('/api/uploadDetectionLedger/deleteDetectFile', udfController.deleteD
 const eroController = require('./controller/eroController')
 router.post('/api/exportRepairOrder/queryRepairInfo', eroController.queryRepairInfo)
 router.post('/api/exportRepairOrder/exportRetestTask', eroController.exportRetestTask)
+router.post('/api/exportRepairOrder/exportWord', eroController.exportWord)
 
 // 上传复测信息
 const uriController = require('./controller/uriController')

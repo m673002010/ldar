@@ -34,7 +34,7 @@ async function importComponent (ctx, next) {
 
         const labelExpands = lodash.map(data, 'labelExpand')
         const oldLabelExpands = lodash.map(oldData, 'labelExpand')
-        const newLabelExpands = lodash.difference(labelExpands, oldLabelExpands)
+        const newLabelExpands = lodash.uniq(lodash.difference(labelExpands, oldLabelExpands))
 
         const newData = newLabelExpands.map(nle => {
             const item = lodash.find(data, { 'labelExpand': nle })
@@ -48,11 +48,8 @@ async function importComponent (ctx, next) {
             return
         }
 
-        await componentCollection.insertMany(newData).catch(err =>{
-            logger.log('组件新增异常:' + err.message, "error")
-            ctx.body = { code: -1 , message: '组件新增失败' }
-            return
-        })
+        // 即使失败也继续插入
+        await componentCollection.insertMany(newData, { ordered: false })
 
         // 记录组件新增条数
         const fileData = { companyNum, importFile, username, newCount: newData.length, createDate: new Date(), createUser: username }

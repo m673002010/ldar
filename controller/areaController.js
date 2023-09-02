@@ -1,5 +1,6 @@
 const areaCollection = require('../db/area.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryArea (ctx, next) {
     try {
@@ -41,9 +42,9 @@ async function addArea (ctx, next) {
 async function editArea (ctx, next) {
     try {
         const { companyNum, username } = ctx.userInfo
-        const { areaNum = '', area = '', deviceNum = '', device = '' } = ctx.request.body
+        const { _id, areaNum = '', area = '', deviceNum = '', device = '' } = ctx.request.body
 
-        await areaCollection.updateOne({ companyNum, areaNum }, { $set: { area, deviceNum, device, editDate: new Date(), editUser: username } })
+        await areaCollection.updateOne({ _id: ObjectId(_id) }, { $set: { areaNum, area, deviceNum, device, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑区域成功' }
     } catch (err) {
@@ -56,10 +57,10 @@ async function deleteArea (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const areaNumArr = lodash.map(deleteData, 'areaNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await areaCollection.deleteMany({ companyNum, areaNum: { $in: areaNumArr } })
-        
+        await areaCollection.deleteMany({ _id: { $in: _idArr } })
+
         ctx.body = { code: 0 , message: '删除区域成功' }
     } catch (err) {
         logger.log('deleteArea异常:' + err, "error")
