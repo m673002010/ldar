@@ -1,6 +1,5 @@
 /**
 {
-    companyNum: String,
     standardGasNum: String,
     standardGas: String,
     dailyCalibration: String,

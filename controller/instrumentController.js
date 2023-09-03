@@ -1,13 +1,13 @@
 const instrumentCollection = require('../db/instrument.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryInstrument (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { serialNumber = '', testInstrument = '' } = ctx.request.query
         
         const query = {}
-        if (companyNum) query.companyNum = companyNum
+
         if (serialNumber) query.serialNumber = serialNumber
         if (testInstrument) query.testInstrument = testInstrument
 
@@ -22,10 +22,10 @@ async function queryInstrument (ctx, next) {
 
 async function addInstrument (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { serialNumber = '', testInstrument = '', finalPrecisionTime = '', invalidTime = '', responseTime = 0 } = ctx.request.body
 
-        const data = { companyNum, serialNumber, testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime) }
+        const data = { serialNumber, testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime) }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
 
         await instrumentCollection.insertOne(data)
@@ -39,12 +39,12 @@ async function addInstrument (ctx, next) {
 
 async function editInstrument (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
-        const { serialNumber = '', testInstrument = '', finalPrecisionTime = '', invalidTime = '' , responseTime = 0 } = ctx.request.body
+        const { username } = ctx.userInfo
+        const { _id = '', serialNumber = '', testInstrument = '', finalPrecisionTime = '', invalidTime = '' , responseTime = 0 } = ctx.request.body
 
-        await instrumentCollection.updateOne({ companyNum, serialNumber }, { 
+        await instrumentCollection.updateOne({ _id: ObjectId(_id) }, { 
             $set: { 
-                testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime), editDate: new Date(), editUser: username 
+                serialNumber, testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime), editDate: new Date(), editUser: username 
             } 
         })
         
@@ -57,11 +57,10 @@ async function editInstrument (ctx, next) {
 
 async function deleteInstrument (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const serialNumberArr = lodash.map(deleteData, 'serialNumber')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await instrumentCollection.deleteMany({ companyNum, serialNumber: { $in: serialNumberArr } })
+        await instrumentCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除仪器成功' }
     } catch (err) {

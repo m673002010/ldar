@@ -1,12 +1,11 @@
 const componentTypeCollection = require('../db/componentType.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryComponentType (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.query
         const query = {}
-        if (companyNum) query.companyNum = companyNum
         if (componentTypeNum) query.componentTypeNum = componentTypeNum
         if (componentType) query.componentType = componentType
         if (calculationType) query.calculationType = calculationType
@@ -23,10 +22,10 @@ async function queryComponentType (ctx, next) {
 
 async function addComponentType (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.body
 
-        const data = { companyNum, componentTypeNum, componentType, calculationType, sealPointType }
+        const data = { componentTypeNum, componentType, calculationType, sealPointType }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await componentTypeCollection.insertOne(data)
@@ -40,10 +39,10 @@ async function addComponentType (ctx, next) {
 
 async function editComponentType (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
-        const { componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.body
+        const { username } = ctx.userInfo
+        const { _id = '', componentTypeNum = '', componentType = '', calculationType = '', sealPointType = '' } = ctx.request.body
 
-        await componentTypeCollection.updateOne({ companyNum, componentTypeNum }, { $set: { componentType, calculationType, sealPointType, editDate: new Date(), editUser: username } })
+        await componentTypeCollection.updateOne({ _id: ObjectId(_id) }, { $set: { componentTypeNum, componentType, calculationType, sealPointType, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑组件类型成功' }
     } catch (err) {
@@ -54,11 +53,10 @@ async function editComponentType (ctx, next) {
 
 async function deleteComponentType (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const componentTypeNumArr = lodash.map(deleteData, 'componentTypeNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await componentTypeCollection.deleteMany({ companyNum, componentTypeNum: { $in: componentTypeNumArr } })
+        await componentTypeCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除组件类型成功' }
     } catch (err) {

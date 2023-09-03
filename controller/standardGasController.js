@@ -1,12 +1,12 @@
 const standardGasCollection = require('../db/standardGas.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryStandardGas (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { standardGasNum = '', standardGas = '' } = ctx.request.query
         const query = {}
-        if (companyNum) query.companyNum = companyNum
+
         if (standardGasNum) query.standardGasNum = standardGasNum
         if (standardGas) query.standardGas = standardGas
 
@@ -21,7 +21,7 @@ async function queryStandardGas (ctx, next) {
 
 async function addStandardGas (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { 
             standardGasNum = '', 
             standardGas = '', 
@@ -34,8 +34,7 @@ async function addStandardGas (ctx, next) {
             stopUse = '',
         } = ctx.request.body
 
-        const data = { 
-            companyNum, 
+        const data = {
             standardGasNum, 
             standardGas,
             dailyCalibration,
@@ -59,8 +58,9 @@ async function addStandardGas (ctx, next) {
 
 async function editStandardGas (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
-        const { 
+        const { username } = ctx.userInfo
+        const {
+            _id = '',
             standardGasNum = '', 
             standardGas = '', 
             dailyCalibration = '',
@@ -72,8 +72,9 @@ async function editStandardGas (ctx, next) {
             stopUse = '',
         } = ctx.request.body
 
-        await standardGasCollection.updateOne({ companyNum, standardGasNum }, { 
-            $set: { 
+        await standardGasCollection.updateOne({ _id: ObjectId(_id) }, { 
+            $set: {
+                standardGasNum,
                 standardGas, 
                 dailyCalibration,
                 needDriftCalibration,
@@ -96,11 +97,10 @@ async function editStandardGas (ctx, next) {
 
 async function deleteStandardGas (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const standardGasNumArr = lodash.map(deleteData, 'standardGasNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await standardGasCollection.deleteMany({ companyNum, standardGasNum: { $in: standardGasNumArr } })
+        await standardGasCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除标准气成功' }
     } catch (err) {

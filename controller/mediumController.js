@@ -1,12 +1,11 @@
 const mediumCollection = require('../db/medium.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryMedium (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { mediumNum = '', medium = '' } = ctx.request.query
         const query = {}
-        if (companyNum) query.companyNum = companyNum
         if (mediumNum) query.mediumNum = mediumNum
         if (medium) query.medium = medium
 
@@ -21,10 +20,10 @@ async function queryMedium (ctx, next) {
 
 async function addMedium (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { mediumNum = '', medium = '', report = '' } = ctx.request.body
 
-        const data = { companyNum, mediumNum, medium, report }
+        const data = { mediumNum, medium, report }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await mediumCollection.insertOne(data)
@@ -38,10 +37,10 @@ async function addMedium (ctx, next) {
 
 async function editMedium (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
-        const { mediumNum = '', medium = '', report = '' } = ctx.request.body
+        const { username } = ctx.userInfo
+        const { _id = '', mediumNum = '', medium = '', report = '' } = ctx.request.body
 
-        await mediumCollection.updateOne({ companyNum, mediumNum }, { $set: { medium, report, editDate: new Date(), editUser: username } })
+        await mediumCollection.updateOne({ _id: ObjectId(_id) }, { $set: { mediumNum, medium, report, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑介质成功' }
     } catch (err) {
@@ -52,11 +51,10 @@ async function editMedium (ctx, next) {
 
 async function deleteMedium (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const mediumNumArr = lodash.map(deleteData, 'mediumNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await mediumCollection.deleteMany({ companyNum, mediumNum: { $in: mediumNumArr } })
+        await mediumCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除介质成功' }
     } catch (err) {

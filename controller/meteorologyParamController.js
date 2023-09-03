@@ -4,11 +4,10 @@ const { ObjectId } = require('mongodb')
 
 async function queryMeteorologyParam (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { date } = ctx.request.body
 
         const query = {}
-        if (companyNum) query.companyNum = companyNum
+
         if (date && date.length) {
             const startDate = date[0]
             const endDate = date[1]
@@ -26,10 +25,10 @@ async function queryMeteorologyParam (ctx, next) {
 
 async function addMeteorologyParam (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { date = '', temperature = '', humidity = '', barometricPressure = '', windDirection = '', windSpeed = '' } = ctx.request.body
 
-        const data = { companyNum, date: new Date(date), temperature, humidity, barometricPressure, windDirection, windSpeed }
+        const data = { date: new Date(date), temperature, humidity, barometricPressure, windDirection, windSpeed }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await meteorologyParamCollection.insertOne(data)
@@ -43,10 +42,10 @@ async function addMeteorologyParam (ctx, next) {
 
 async function editMeteorologyParam (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { _id = '', date = '', temperature = '', humidity = '', barometricPressure = '', windDirection = '', windSpeed = '' } = ctx.request.body
 
-        await meteorologyParamCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { 
+        await meteorologyParamCollection.updateOne({ _id: ObjectId(_id) }, { 
             $set: { 
                 date: new Date(date), temperature, humidity, barometricPressure, windDirection, windSpeed, editDate: new Date(), editUser: username 
             }
@@ -61,11 +60,10 @@ async function editMeteorologyParam (ctx, next) {
 
 async function deleteMeteorologyParam (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
         const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await meteorologyParamCollection.deleteMany({ companyNum, _id: { $in: _idArr } })
+        await meteorologyParamCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除气象参数成功' }
     } catch (err) {

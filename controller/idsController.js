@@ -2,12 +2,9 @@ const iDSCollection = require('../db/instrumentDetectionStatistics')
 
 async function importData (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { importData = [] } = ctx.request.body
-        
-        const data = importData.map(item => Object.assign(item, { companyNum }))
 
-        await iDSCollection.insertMany(data)
+        await iDSCollection.insertMany(importData)
         
         ctx.body = { code: 0 , message: '导入数据成功' }
     } catch (err) {
@@ -18,12 +15,10 @@ async function importData (ctx, next) {
 
 async function instrumentDetectionStatistics (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { year = '', quarter = '' } = ctx.request.query
         const query = {}
         if (year) query.year = +year
         if (quarter) query.quarter = quarter
-        if (companyNum) query.companyNum = companyNum
 
         const iDSData = await iDSCollection.find(query).toArray()
         

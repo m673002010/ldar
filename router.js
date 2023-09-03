@@ -258,11 +258,11 @@ router.post('/api/componentType/editComponentType', componentTypeController.edit
 router.post('/api/componentType/deleteComponentType', componentTypeController.deleteComponentType)
 
 // 介质状态
-const MediumController = require('./controller/mediumController')
-router.get('/api/medium/queryMedium', MediumController.queryMedium)
-router.post('/api/medium/addMedium', MediumController.addMedium)
-router.post('/api/medium/editMedium', MediumController.editMedium)
-router.post('/api/medium/deleteMedium', MediumController.deleteMedium)
+const mediumController = require('./controller/mediumController')
+router.get('/api/medium/queryMedium', mediumController.queryMedium)
+router.post('/api/medium/addMedium', mediumController.addMedium)
+router.post('/api/medium/editMedium', mediumController.editMedium)
+router.post('/api/medium/deleteMedium', mediumController.deleteMedium)
 
 // 仪器检测统计
 const idsController = require('./controller/idsController')

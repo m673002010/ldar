@@ -1,6 +1,5 @@
 /**
 {
-    companyNum: String,
     date: Date,
     temperature: String,
     humidity: String,

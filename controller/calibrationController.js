@@ -2,14 +2,12 @@ const calibrationCollection = require('../db/calibration.js')
 const lodash = require('lodash')
 const { ObjectId } = require('mongodb')
 
-
 async function queryCalibration (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { date } = ctx.request.body
 
         const query = {}
-        if (companyNum) query.companyNum = companyNum
+
         if (date && date.length) {
             const startDate = date[0]
             const endDate = date[1]
@@ -27,11 +25,9 @@ async function queryCalibration (ctx, next) {
 
 async function importCalibration (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { importData = [] } = ctx.request.body
         
         const data = importData.map(item => { 
-            Object.assign(item, { companyNum })
             item.calibrationDate = new Date(item.calibrationDate)
             return item
         })
@@ -47,11 +43,10 @@ async function importCalibration (ctx, next) {
 
 async function deleteCalibration (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
         const idArr = lodash.map(deleteData, '_id').map(id => ObjectId(id))
 
-        await calibrationCollection.deleteMany({ companyNum, _id: { $in: idArr } })
+        await calibrationCollection.deleteMany({ _id: { $in: idArr } })
         
         ctx.body = { code: 0 , message: '删除校准数据成功' }
     } catch (err) {

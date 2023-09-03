@@ -1,6 +1,5 @@
 /**
 {
-    companyNum: String,
     calculationTypeNum: String,
     calculationType: String,
     createDate: Date,

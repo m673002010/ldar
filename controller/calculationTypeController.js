@@ -1,12 +1,11 @@
 const calculationTypeCollection = require('../db/calculationType.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryCalculationType (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { calculationTypeNum = '', calculationType = '' } = ctx.request.query
         const query = {}
-        if (companyNum) query.companyNum = companyNum
         if (calculationTypeNum) query.calculationTypeNum = calculationTypeNum
         if (calculationType) query.calculationType = calculationType
 
@@ -21,10 +20,10 @@ async function queryCalculationType (ctx, next) {
 
 async function addCalculationType (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { calculationTypeNum = '', calculationType = '' } = ctx.request.body
 
-        const data = { companyNum, calculationTypeNum, calculationType }
+        const data = { calculationTypeNum, calculationType }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await calculationTypeCollection.insertOne(data)
@@ -38,10 +37,10 @@ async function addCalculationType (ctx, next) {
 
 async function editCalculationType (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
-        const { calculationTypeNum = '', calculationType = '' } = ctx.request.body
+        const { username } = ctx.userInfo
+        const { _id = '', calculationTypeNum = '', calculationType = '' } = ctx.request.body
 
-        await calculationTypeCollection.updateOne({ companyNum, calculationTypeNum }, { $set: { calculationType, editDate: new Date(), editUser: username } })
+        await calculationTypeCollection.updateOne({ _id: ObjectId(_id) }, { $set: { calculationTypeNum, calculationType, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑计算类型成功' }
     } catch (err) {
@@ -52,11 +51,10 @@ async function editCalculationType (ctx, next) {
 
 async function deleteCalculationType (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const calculationTypeNumArr = lodash.map(deleteData, 'calculationTypeNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await calculationTypeCollection.deleteMany({ companyNum, calculationTypeNum: { $in: calculationTypeNumArr } })
+        await calculationTypeCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除计算类型成功' }
     } catch (err) {

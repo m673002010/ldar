@@ -1,12 +1,11 @@
 const deviceTypeCollection = require('../db/deviceType.js')
 const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function queryDeviceType (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deviceTypeNum = '', deviceType = '' } = ctx.request.query
         const query = {}
-        if (companyNum) query.companyNum = companyNum
         if (deviceTypeNum) query.deviceTypeNum = deviceTypeNum
         if (deviceType) query.deviceType = deviceType
 
@@ -21,10 +20,10 @@ async function queryDeviceType (ctx, next) {
 
 async function addDeviceType (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
+        const { username } = ctx.userInfo
         const { deviceTypeNum = '', deviceType = '' } = ctx.request.body
 
-        const data = { companyNum, deviceTypeNum, deviceType, type: deviceType }
+        const data = { deviceTypeNum, deviceType, type: deviceType }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await deviceTypeCollection.insertOne(data)
@@ -38,10 +37,10 @@ async function addDeviceType (ctx, next) {
 
 async function editDeviceType (ctx, next) {
     try {
-        const { companyNum, username } = ctx.userInfo
-        const { deviceTypeNum = '', deviceType = '' } = ctx.request.body
+        const { username } = ctx.userInfo
+        const { _id = '', deviceTypeNum = '', deviceType = '' } = ctx.request.body
 
-        await deviceTypeCollection.updateOne({ companyNum, deviceTypeNum }, { $set: { deviceType, editDate: new Date(), editUser: username } })
+        await deviceTypeCollection.updateOne({ _id: ObjectId(_id) }, { $set: { deviceTypeNum, deviceType, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑装置类型成功' }
     } catch (err) {
@@ -52,11 +51,10 @@ async function editDeviceType (ctx, next) {
 
 async function deleteDeviceType (ctx, next) {
     try {
-        const { companyNum } = ctx.userInfo
         const { deleteData } = ctx.request.body
-        const deviceTypeNumArr = lodash.map(deleteData, 'deviceTypeNum')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await deviceTypeCollection.deleteMany({ companyNum, deviceTypeNum: { $in: deviceTypeNumArr } })
+        await deviceTypeCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除装置类型成功' }
     } catch (err) {

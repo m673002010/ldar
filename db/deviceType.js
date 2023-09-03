@@ -1,6 +1,5 @@
 /**
 {
-    companyNum: String,
     deviceTypeNum: String,
     type: String,
     deviceType: String,

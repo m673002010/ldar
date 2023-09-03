@@ -1,6 +1,5 @@
 /**
 {
-    companyNum: String,
     calibrationDate: String,
     calibrationPeople: String,
     instrumentNum: Date,

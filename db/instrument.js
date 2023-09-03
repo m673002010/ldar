@@ -1,6 +1,5 @@
 /**
 {
-    companyNum: String,
     serialNumber: String,
     testInstrument: String,
     finalPrecisionTime: Date,
