@@ -37,9 +37,9 @@ async function addRegulation (ctx, next) {
 async function editRegulation (ctx, next) {
     try {
         const { username } = ctx.userInfo
-        const { regulationCode = '', regulation = '' } = ctx.request.body
+        const { _id = '', regulationCode = '', regulation = '' } = ctx.request.body
 
-        await regulationCollection.updateOne({ regulationCode }, { $set: { regulation, editDate: new Date(), editUser: username } })
+        await regulationCollection.updateOne({ _id: ObjectId(_id) }, { $set: { regulationCode, regulation, editDate: new Date(), editUser: username } })
         
         ctx.body = { code: 0 , message: '编辑法规成功' }
     } catch (err) {
@@ -51,9 +51,9 @@ async function editRegulation (ctx, next) {
 async function deleteRegulation (ctx, next) {
     try {
         const { deleteData } = ctx.request.body
-        const regulationCodeArr = lodash.map(deleteData, 'regulationCode')
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
 
-        await regulationCollection.deleteMany({ regulationCode: { $in: regulationCodeArr } })
+        await regulationCollection.deleteMany({ _id: { $in: _idArr } })
         
         ctx.body = { code: 0 , message: '删除法规成功' }
     } catch (err) {
