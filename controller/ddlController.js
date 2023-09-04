@@ -1,5 +1,6 @@
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
+const pictureLedgerCollection = require('../db/pictureLedger.js')
 const lodash = require('lodash')
 
 const quarterMap = {
@@ -46,12 +47,18 @@ async function detectionDataLedger (ctx, next) {
         // 检测数据
         let detectData = await detectLedgerCollection.find(query).toArray()
 
+        // 补充图片信息
+        const pictures = await pictureLedgerCollection.find({ companyNum }).toArray()
+
         // 补充组件信息
         const labelExpandArr = lodash.map(detectData, 'labelExpand')
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         detectData = detectData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
             Object.assign(item, component)
+
+            const pic = lodash.find(pictures, { 'label': item.label })
+            Object.assign(item, { picturePath: pic.picturePath})
 
             item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             item.picture = item.label

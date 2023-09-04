@@ -1,4 +1,6 @@
 const componentCollection = require('../db/component')
+const pictureLedgerCollection = require('../db/pictureLedger.js')
+const lodash = require('lodash')
 const compressing = require('compressing')
 const path = require('path')
 
@@ -13,7 +15,8 @@ async function componentPictureLedger (ctx, next) {
         if (equipment) query.equipment = equipment
         // if (quarter) query.quarter = quarter
 
-        const componentData = await componentCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
+        let componentData = await componentCollection.find(query).limit(+pageSize).skip((+currentPage - 1) * pageSize).toArray()
+        
         const total = await componentCollection.find(query).count()
         let labelData = componentData.map(item => {
             const obj = { 
@@ -30,6 +33,15 @@ async function componentPictureLedger (ctx, next) {
             return obj
         })
 
+        // 补充图片信息
+        const pictures = await pictureLedgerCollection.find({ companyNum }).toArray()
+        labelData = labelData.map(item => {
+            const pic = lodash.find(pictures, { 'label': item.label })
+            Object.assign(item, { picturePath: pic.picturePath})
+
+            return item
+        })
+        
         ctx.body = { code: 0 , message: '查询图片成功', data: { labelData, total } }
     } catch (err) {
         logger.log('componentPictureLedger异常:' + err, "error")

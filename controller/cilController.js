@@ -1,5 +1,5 @@
 const componentCollection = require('../db/component')
-const componentTypeCollection = require('../db/componentType')
+const pictureLedgerCollection = require('../db/pictureLedger.js')
 const regulationComponentCollection = require('../db/regulationComponent')
 const company = require('../db/company')
 const lodash = require('lodash')
@@ -36,6 +36,15 @@ async function componentInfoLedger (ctx, next) {
         let componentData = await componentCollection.find(query).toArray()
         const total = componentData.length
         componentData = componentData.slice((currentPage-1) * pageSize, currentPage * pageSize)
+
+        // 补充图片信息
+        const pictures = await pictureLedgerCollection.find({ companyNum }).toArray()
+        componentData = componentData.map(item => {
+            const pic = lodash.find(pictures, { 'label': item.label })
+            Object.assign(item, { picturePath: pic.picturePath})
+
+            return item
+        })
 
         // 补充法规和检测频率信息
         const arr = []

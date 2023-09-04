@@ -1,5 +1,6 @@
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
+const pictureLedgerCollection = require('../db/pictureLedger.js')
 const fs = require("fs")
 const path = require("path")
 const lodash = require('lodash')
@@ -24,12 +25,18 @@ async function queryRepairInfo (ctx, next) {
 
         let repairInfoData = await detectLedgerCollection.find(query).toArray()
 
+        // 补充图片信息
+        const pictures = await pictureLedgerCollection.find({ companyNum }).toArray()
+
         // 补充组件信息
         const labelExpandArr = lodash.map(repairInfoData, 'labelExpand')
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         repairInfoData = repairInfoData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
             Object.assign(item, component)
+
+            const pic = lodash.find(pictures, { 'label': item.label })
+            Object.assign(item, { picturePath: pic.picturePath})
 
             item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             return item

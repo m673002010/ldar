@@ -1,5 +1,6 @@
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
+const pictureLedgerCollection = require('../db/pictureLedger.js')
 const lodash = require('lodash')
 
 const quarterMap = {
@@ -39,7 +40,8 @@ async function queryLeakInfoLedger (ctx, next) {
         // 泄漏信息
         let leakData = await detectLedgerCollection.find(query).toArray()
 
-        
+         // 补充图片信息
+        const pictures = await pictureLedgerCollection.find({ companyNum }).toArray()
 
         // 补充组件信息
         const labelExpandArr = lodash.map(leakData, 'labelExpand')
@@ -47,6 +49,9 @@ async function queryLeakInfoLedger (ctx, next) {
         leakData = leakData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
             Object.assign(item, component)
+
+            const pic = lodash.find(pictures, { 'label': item.label })
+            Object.assign(item, { picturePath: pic.picturePath})
 
             item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             item.leakLevel = '安全'
@@ -123,7 +128,7 @@ async function exportLeakInfoLedger (ctx, next) {
 
         ctx.body = { code: 0 , message: '导出泄漏信息台账成功', data: leakData }
     } catch (err) {
-        logger.log('queryLeakInfoLedger异常:' + err, "error")
+        logger.log('exportLeakInfoLedger异常:' + err, "error")
         ctx.body = { code: -1 , message: '导出泄漏信息台账失败' }
     }
 }
