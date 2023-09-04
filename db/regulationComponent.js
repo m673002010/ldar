@@ -5,7 +5,7 @@
     componentType: String,
     mediumStatus: String,
     quarter: String,
-    threshold: String,
+    threshold: Number,
     createDate: Date,
     createUser: String,
     editDate: Date,

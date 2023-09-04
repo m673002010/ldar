@@ -1,13 +1,10 @@
-const retestInfoCollection = require('../db/retestInfo')
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
-const companyCollection = require('../db/company')
-const regulationComponentCollection = require('../db/regulationComponent')
+const fs = require("fs")
+const path = require("path")
 const lodash = require('lodash')
 const PizZip = require("pizzip")
 const Docxtemplater = require("docxtemplater")
-const fs = require("fs")
-const path = require("path")
 
 async function queryRepairInfo (ctx, next) {
     try {
@@ -18,62 +15,29 @@ async function queryRepairInfo (ctx, next) {
         if (device) query.device = device
         if (area) query.area = area
         if (equipment) query.equipment = equipment
+        if (isLeak) query.isLeak = isLeak
         if (isDelayRepair) query.isDelayRepair = isDelayRepair
         if (date && date.length) {
-            const startDate = date[0]
-            const endDate = date[1]
-            query.retestStartDate = { $gte: new Date(startDate) }
-            query.retestEndDate = { $lte: new Date(endDate) }
+            query.retestStartDate = { $gte: new Date(date[0]) }
+            query.retestEndDate = { $lte: new Date(date[1]) }
         }
 
-        let retestInfoData = await retestInfoCollection.find(query).toArray()
+        let repairInfoData = await detectLedgerCollection.find(query).toArray()
 
-        const labelExpandArr = lodash.map(retestInfoData, 'labelExpand')
-        const quarterCodeArr = lodash.map(retestInfoData, 'quarterCode')
-
-        // 组件信息
+        // 补充组件信息
+        const labelExpandArr = lodash.map(repairInfoData, 'labelExpand')
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
+        repairInfoData = repairInfoData.map(item => {
+            const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            Object.assign(item, component)
 
-        // 检测信息
-        let detectData = await detectLedgerCollection.find({ 
-            companyNum, 
-            labelExpand: { $in: labelExpandArr }, 
-            quarterCode: { $in: quarterCodeArr } 
-        }).toArray()
-
-        // 阈值
-        const regulationCode = (await companyCollection.findOne({ companyNum })).regulationCode
-        const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
-
-        detectData = detectData.map(item => {
-            item.detectStartDate = item.startDate
-            item.detectEndDate = item.endDate
-            item.detectBackgroundValue = item.backgroundValue 
-            item.detectNetWorth = item.detectValue - item.backgroundValue
-
+            item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             return item
         })
 
-        // 补充信息
-        retestInfoData = retestInfoData.map(item => {
-            const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
-            const d = lodash.find(detectData, { 'labelExpand': item.labelExpand, 'quarterCode': item.quarterCode })
+        if (componentType) repairInfoData = lodash.filter(repairInfoData, item => { return item.componentType === componentType })
 
-            Object.assign(item, c, d)
-
-            const r = lodash.find(regulationComponentData, { 'componentType': item.componentType, 'mediumStatus': item.mediumStatus })
-
-            Object.assign(item, { threshold: r.threshold })
-
-            item.isLeak = item.detectValue >= item.threshold ? '是' : '否'
-
-            return item
-        })
-
-        if (componentType) retestInfoData = lodash.filter(retestInfoData, item => { return item.componentType === componentType })
-        if (isLeak) retestInfoData = lodash.filter(retestInfoData, item => { return item.isLeak === isLeak })
-
-        ctx.body = { code: 0 , message: '查询复测信息成功', data: retestInfoData }
+        ctx.body = { code: 0 , message: '查询复测信息成功', data: repairInfoData }
     } catch (err) {
         logger.log('queryRepairInfo异常:' + err, "error")
         ctx.body = { code: -1 , message: '查询复测信息失败' }

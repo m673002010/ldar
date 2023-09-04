@@ -1,7 +1,6 @@
 const assignmentCollection = require('../db/assignment')
 const assignOrderCollection = require('../db/assignOrder')
 const detectLedgerCollection = require('../db/detectLedger')
-const leakLedgerCollection = require('../db/leakLedger')
 const componentCollection = require('../db/component')
 const companyCollection = require('../db/company')
 const regulationComponentCollection = require('../db/regulationComponent')
@@ -25,21 +24,18 @@ async function uploadDetectTask (ctx, next) {
             item.quarterCode = quarterCode
             item.assignNum = assignNum
             item.labelExpand = item.label + '-' + item.expand
-            item.detectDate = new Date(item.detectDate)
-            item.startDate = new Date(item.startDate)
-            item.endDate = new Date(item.endDate)
+            item.detectValue = +item.detectValue
+            item.detectBackgroundValue = +item.detectBackgroundValue
+            item.detectStartDate = new Date(item.detectStartDate)
+            item.detectEndDate = new Date(item.detectEndDate)
 
             return item
         })
 
-        // 提取上传数据中的检测点
+        // 提取上传数据中的检测点，匹配任务单分配点，分配点位和上传检测点位需要相等
         const detectLabelExpandArr = lodash.map(detectData, 'labelExpand')
-
-        // 任务单分配点
         const assignOrderData = await assignOrderCollection.findOne({ companyNum, quarterCode, assignNum })
         const assignedArr = assignOrderData.assignedArr
-
-        // 任务单分配点位和上传检测点位需要相等
         if (!lodash.isEqual(assignedArr, detectLabelExpandArr)) {
             ctx.body = { code: -1 , message: '上传检测点位和已分配点位不对应' }
             return
@@ -56,18 +52,23 @@ async function uploadDetectTask (ctx, next) {
             return obj
         })
 
-        // 检测值-背景值，是否大于组件的阈值，判断是否泄漏，并记录泄漏信息
+        // 记录泄漏
         const leakFixArr = []
         for (const item of detectData) {
-            const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
-            const t = lodash.find(thresholdData, { 'componentType': c.componentType, 'mediumStatus': c.mediumStatus })
+            const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            // 根据组件类型和介质状态获取对应阈值
+            const t = lodash.find(thresholdData, { 'componentType': component.componentType, 'mediumStatus': component.mediumStatus })
 
-            const detectNetWorth = item.detectValue - item.backgroundValue
+            // 检测值-背景值，是否大于组件的阈值，判断是否泄漏
+            item.isLeak = '否'
+            if (t) {
+                const detectNetWorth = item.detectValue - item.detectBackgroundValue
 
-            // 泄漏
-            if (detectNetWorth > t.threshold) {
-                leakFixArr.push(item.labelExpand)
-                await leakLedgerCollection.insertOne(item)
+                if (detectNetWorth > t.threshold) {
+                    leakFixArr.push(item.labelExpand)
+                    item.isLeak = '是'
+                }
+                item.threshold = t.threshold
             }
         }
 
@@ -80,9 +81,8 @@ async function uploadDetectTask (ctx, next) {
             }
         })
 
-        // 避免重复上传，先删除旧检测台账
+        // 避免重复上传，先删除旧检测台账，再新增检测任务台账
         await detectLedgerCollection.deleteMany({ companyNum, quarterCode, assignNum })
-        // 新增检测任务台账
         await detectLedgerCollection.insertMany(detectData)
 
         // 更新检测周期

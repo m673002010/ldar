@@ -80,7 +80,7 @@ async function addRegulationComponent (ctx, next) {
         const { username } = ctx.userInfo
         const { regulationCode = '', detailNum = '', componentType = '', mediumStatus = '', quarter = '', threshold } = ctx.request.body
 
-        const data = { regulationCode, detailNum, componentType, mediumStatus, quarter, threshold }
+        const data = { regulationCode, detailNum, componentType, mediumStatus, quarter, threshold: +threshold }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username, })
 
         await regulationComponentCollection.insertOne(data)
@@ -95,14 +95,14 @@ async function addRegulationComponent (ctx, next) {
 async function editRegulationComponent (ctx, next) {
     try {
         const { username } = ctx.userInfo
-        const { regulationCode = '', detailNum = '', componentType = '', mediumStatus = '', quarter = '', threshold = '' } = ctx.request.body
+        const { regulationCode = '', detailNum = '', componentType = '', mediumStatus = '', quarter = '', threshold = 0 } = ctx.request.body
 
         await regulationComponentCollection.updateOne({ regulationCode, detailNum }, { 
             $set: {
                 componentType, 
                 mediumStatus,
                 quarter,
-                threshold,
+                threshold: +threshold,
                 editDate: new Date(),
                 editUser: username 
             } 

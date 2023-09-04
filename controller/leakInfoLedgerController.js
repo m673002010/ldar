@@ -1,8 +1,5 @@
-const retestInfoCollection = require('../db/retestInfo')
-const leakLedgerCollection = require('../db/leakLedger')
+const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
-const companyCollection = require('../db/company')
-const regulationComponentCollection = require('../db/regulationComponent')
 const lodash = require('lodash')
 
 const quarterMap = {
@@ -15,7 +12,7 @@ const quarterMap = {
 async function queryLeakInfoLedger (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { 
+        const {
             year = '',
             quarter = '', 
             date = null, 
@@ -29,56 +26,29 @@ async function queryLeakInfoLedger (ctx, next) {
             pageSize = 10
         } = ctx.request.body
 
-        const query = { companyNum }
+        const query = { companyNum, isLeak: '是' }
         if (device) query.device = device
         if (area) query.area = area
         if (equipment) query.equipment = equipment
         if (date && date.length) {
-            const startDate = date[0]
-            const endDate = date[1]
-            query.startDate = { $gte: new Date(startDate) }
-            query.endDate = { $lte: new Date(endDate) }
+            query.detectStartDate = { $gte: new Date(date[0]) }
+            query.detectEndDate = { $lte: new Date(date[1]) }
         }
         if (detectPeople) query.detectPeople = detectPeople
 
         // 泄漏信息
-        let leakData = await leakLedgerCollection.find(query).toArray()
+        let leakData = await detectLedgerCollection.find(query).toArray()
 
+        
+
+        // 补充组件信息
         const labelExpandArr = lodash.map(leakData, 'labelExpand')
-        const quarterCodeArr = lodash.map(leakData, 'quarterCode')
-
-        // 组件信息
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
-
-        // 复测信息
-        const retestData = await retestInfoCollection.find({ 
-            companyNum, 
-            labelExpand: { $in: labelExpandArr }, 
-            quarterCode: { $in: quarterCodeArr } 
-        }).toArray()
-
-        // 阈值
-        const regulationCode = (await companyCollection.findOne({ companyNum })).regulationCode
-        const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
-
-        // 补充组件、复测信息、阈值到检测信息
         leakData = leakData.map(item => {
-            const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
-            const r = lodash.find(retestData, { 'labelExpand': item.labelExpand, 'quarterCode': item.quarterCode })
-            Object.assign(item, c, r)
+            const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            Object.assign(item, component)
 
-            const rc = lodash.find(regulationComponentData, { 'componentType': item.componentType, 'mediumStatus': item.mediumStatus })
-            Object.assign(item, { threshold: rc.threshold })
-
-            return item
-        })
-
-        leakData = leakData.map(item => {
-            item.detectStartDate = item.startDate
-            item.detectEndDate = item.endDate
-            item.detectNetWorth = item.detectValue - item.backgroundValue
-
-            item.isLeak = item.detectNetWorth >= item.threshold ? '是' : '否'
+            item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             item.leakLevel = '安全'
 
             return item
@@ -114,60 +84,34 @@ async function exportLeakInfoLedger (ctx, next) {
             detectPeople = '',
         } = ctx.request.body
 
-        const query = { companyNum }
+        const query = { companyNum, isLeak: '是' }
         if (device) query.device = device
         if (area) query.area = area
         if (equipment) query.equipment = equipment
         if (date && date.length) {
-            const startDate = date[0]
-            const endDate = date[1]
-            query.startDate = { $gte: new Date(startDate) }
-            query.endDate = { $lte: new Date(endDate) }
+            query.startDate = { $gte: new Date(date[0]) }
+            query.endDate = { $lte: new Date(date[1]) }
         }
         if (detectPeople) query.detectPeople = detectPeople
 
 
         // 泄漏信息
-        let leakData = await leakLedgerCollection.find(query).toArray()
+        let leakData = await detectLedgerCollection.find(query).toArray()
 
+        // 补充组件信息
         const labelExpandArr = lodash.map(leakData, 'labelExpand')
-        const quarterCodeArr = lodash.map(leakData, 'quarterCode')
-
-        // 组件信息
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
-
-        // 复测信息
-        const retestData = await retestInfoCollection.find({ 
-            companyNum, 
-            labelExpand: { $in: labelExpandArr }, 
-            quarterCode: { $in: quarterCodeArr } 
-        }).toArray()
-
-        // 阈值
-        const regulationCode = (await companyCollection.findOne({ companyNum })).regulationCode
-        const regulationComponentData = await regulationComponentCollection.find({ regulationCode }).toArray()
-
-        // 补充组件、复测信息、阈值到检测信息
         leakData = leakData.map(item => {
-            const c = lodash.find(componentData, { 'labelExpand': item.labelExpand })
-            const r = lodash.find(retestData, { 'labelExpand': item.labelExpand, 'quarterCode': item.quarterCode })
-            Object.assign(item, c, r)
-
-            const rc = lodash.find(regulationComponentData, { 'componentType': item.componentType, 'mediumStatus': item.mediumStatus })
-            Object.assign(item, { threshold: rc.threshold })
+            const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            Object.assign(item, component)
 
             // 导出表格字段调整
-            item.detectStartDate = item.startDate
-            item.detectEndDate = item.endDate
-            item.detectNetWorth = item.detectValue - item.backgroundValue
-            
-            item.isLeak = item.detectNetWorth >= item.threshold ? '是' : '否'
-            item.leakLevel = '安全'
-            
+            item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             item.picture = item.label
             item.rateBeforeRepair = item.leakRate
             item.valueBeforeRepair = item.detectNetWorth
-            item.backgroundValueBeforeRepair = item.backgroundValue
+            item.backgroundValueBeforeRepair = item.detectBackgroundValue
+            item.leakLevel = '安全'
 
             return item
         })
