@@ -7,6 +7,7 @@ const lodash = require('lodash')
 const PizZip = require("pizzip")
 const Docxtemplater = require("docxtemplater")
 const ImageModule = require('docxtemplater-image-module-free')
+const DocxMerger = require('docx-merger')
 
 async function queryRepairInfo (ctx, next) {
     try {
@@ -64,9 +65,7 @@ async function exportRetestTask (ctx, next) {
 async function exportWord (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-
-        const { repairInfo = null } = ctx.request.body
-        repairInfo.location = `${repairInfo.equipment} ${repairInfo.location} ${repairInfo.distance}米 ${repairInfo.floor}楼 ${repairInfo.high}米`
+        const { repairInfoArr = [] } = ctx.request.body
 
         // 如果文件夹不存在，创建它
         const folderPath = path.join(__dirname, `../static/${companyNum}/repairOrder`)
@@ -77,36 +76,58 @@ async function exportWord (ctx, next) {
         } else {
             logger.log(`文件夹 ${folderPath} 已经存在`)
         }
-        const outPath = `${folderPath}/维修工单.docx`
 
-        // Load the docx file as binary content
-        const templatePath = path.join(__dirname, `../static/template/repairOrderTemplate.docx`)
-        const content = fs.readFileSync(
-            templatePath,
-            "binary"
-        )
-        const zip = new PizZip(content)
- 
-        const opts = {
-            centered: true,
-            filetType: "docx"
-        }
-        opts.getImage = function(tagValue, tagName) {
-            return fs.readFileSync(tagValue)
-        }
-        opts.getSize = function(img, tagValue, tagName) {
-            return [350, 350]
-        }
-        const imageModule = new ImageModule(opts)
+        // 生成docx
+        const mergeArr = []
+        for (const item of repairInfoArr) {
+            item.location = `${item.equipment} ${item.location} ${item.distance}米 ${item.floor}楼 ${item.high}米`
 
-        var docx = new Docxtemplater()
-        .attachModule(imageModule)
-        .loadZip(zip)
-        .setData(Object.assign(repairInfo, { image: path.join(__dirname, `../static${repairInfo.picturePath}`) }))
-        .render()
+            // 加载模板
+            const templatePath = path.join(__dirname, `../static/template/repairOrderTemplate.docx`)
+            const content = fs.readFileSync(
+                templatePath,
+                "binary"
+            )
+            const zip = new PizZip(content)
 
-        const buffer = docx.getZip().generate({ type: "nodebuffer" })
-        fs.writeFileSync(outPath, buffer)
+            // 逐个记录生成文件
+            const outPath = `${folderPath}/维修工单${item._id}.docx`
+            mergeArr.push(outPath)
+
+            // 图片设置
+            const opts = {
+                centered: true,
+                filetType: "docx"
+            }
+            opts.getImage = function(tagValue, tagName) {
+                return fs.readFileSync(tagValue)
+            }
+            opts.getSize = function(img, tagValue, tagName) {
+                return [350, 350]
+            }
+            const imageModule = new ImageModule(opts)
+
+            const docx = new Docxtemplater()
+            .attachModule(imageModule)
+            .loadZip(zip)
+            .setData(Object.assign(item, { image: path.join(__dirname, `../static${item.picturePath}`) }))
+            .render()
+
+            const buffer = docx.getZip().generate({ type: "nodebuffer" })
+            fs.writeFileSync(outPath, buffer)
+        }
+
+        // 合并
+        const fileArr = []
+        for (const item of mergeArr) {
+            const file = fs.readFileSync(item, 'binary')
+            fileArr.push(file)
+        }
+        const merger = new DocxMerger({}, fileArr)
+
+        merger.save('nodebuffer',function (data) {
+            fs.writeFileSync(`${folderPath}/维修工单.docx`, data, function(err){})
+        })
 
         ctx.body = { code: 0 , message: '导出维修工单成功', data: `/${companyNum}/repairOrder/维修工单.docx` }
     } catch (err) {
