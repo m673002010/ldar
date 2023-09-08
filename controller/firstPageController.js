@@ -2,10 +2,10 @@ const assignmentCollection = require('../db/assignment')
 const componentCollection = require('../db/component')
 const lodash = require('lodash')
 const dateMap = {
-    'First-Ldar-Quarter': { start: '0101', end: '0331'},
-    'Second-Ldar-Quarter': { start: '0401', end:'0631'},
-    'Third-Ldar-Quarter': { start: '0701', end:'0931'},
-    'Fourth-Ldar-Quarter': { start: '1001', end:'1231'},
+    'First-Ldar-Quarter': { start: 1, end: 3},
+    'Second-Ldar-Quarter': { start: 4, end: 6},
+    'Third-Ldar-Quarter': { start: 7, end: 9},
+    'Fourth-Ldar-Quarter': { start: 10, end:12 },
 }
 
 async function currentCycle (ctx, next) {
@@ -14,12 +14,10 @@ async function currentCycle (ctx, next) {
         let quarterCode
         const date = new Date()
         const year = date.getFullYear()
-        const month = date.getMonth()
-        const day = date.getDate()
-        const monthDay = month + '' + day
+        const month = date.getMonth() + 1
 
         for (let key in dateMap) {
-            if (+monthDay >= +dateMap[key].start && +monthDay <= +dateMap[key].end){
+            if (month >= +dateMap[key].start && +month <= +dateMap[key].end){
                 quarterCode = year + '-' + key
             }
         }
@@ -67,8 +65,6 @@ async function currentCycle (ctx, next) {
             obj.totalPoint = item.value
             obj.detectedPoint = d ? d.value : 0 
             obj.leakPoint = l ? l.value : 0
-            obj.finishRatio = obj.totalPoint ? (obj.detectedPoint / obj.totalPoint) * 100 + '%' : '0%'
-            obj.leakRatio = obj.detectedPoint ? (obj.leakPoint / obj.detectedPoint) * 100 + '%' : '0%'
             obj.delayFix = 0
 
             return obj
@@ -156,8 +152,6 @@ async function allCycle (ctx, next) {
             obj.totalPoint = item.value
             obj.detectedPoint = d ? d.value : 0 
             obj.leakPoint = l ? l.value : 0
-            obj.finishRatio = obj.totalPoint ? (obj.detectedPoint / obj.totalPoint) * 100 + '%' : '0%'
-            obj.leakRatio = obj.detectedPoint ? (obj.leakPoint / obj.detectedPoint) * 100 + '%' : '0%'
             obj.delayFix = 0
 
             return obj
