@@ -38,7 +38,7 @@ async function queryRepairInfo (ctx, next) {
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })
-            Object.assign(item, { picturePath: pic.picturePath})
+            if (pic) Object.assign(item, { picturePath: pic.picturePath})
 
             item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             return item
@@ -66,6 +66,8 @@ async function exportWord (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
         const { repairInfoArr = [] } = ctx.request.body
+
+        console.log('=========', repairInfoArr)
 
         // 如果文件夹不存在，创建它
         const folderPath = path.join(__dirname, `../static/${companyNum}/repairOrder`)

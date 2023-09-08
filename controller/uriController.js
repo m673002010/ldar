@@ -29,7 +29,7 @@ async function queryRetestInfo (ctx, next) {
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })
-            Object.assign(item, { picturePath: pic.picturePath})
+            if (pic) Object.assign(item, { picturePath: pic.picturePath})
 
             // 检测净值
             item.detectNetWorth = item.detectValue - item.detectBackgroundValue

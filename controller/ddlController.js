@@ -58,7 +58,7 @@ async function detectionDataLedger (ctx, next) {
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })
-            Object.assign(item, { picturePath: pic.picturePath})
+            if (pic) Object.assign(item, { picturePath: pic.picturePath})
 
             item.detectNetWorth = item.detectValue - item.detectBackgroundValue
             item.picture = item.label

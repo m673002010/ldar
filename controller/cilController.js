@@ -41,7 +41,7 @@ async function componentInfoLedger (ctx, next) {
         const pictures = await pictureLedgerCollection.find({ companyNum }).toArray()
         componentData = componentData.map(item => {
             const pic = lodash.find(pictures, { 'label': item.label })
-            Object.assign(item, { picturePath: pic.picturePath})
+            if (pic) Object.assign(item, { picturePath: pic.picturePath})
 
             return item
         })
