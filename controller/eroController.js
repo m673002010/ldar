@@ -67,8 +67,6 @@ async function exportWord (ctx, next) {
         const { companyNum } = ctx.userInfo
         const { repairInfoArr = [] } = ctx.request.body
 
-        console.log('=========', repairInfoArr)
-
         // 如果文件夹不存在，创建它
         const folderPath = path.join(__dirname, `../static/${companyNum}/repairOrder`)
         if (!fs.existsSync(folderPath)) {
@@ -130,6 +128,16 @@ async function exportWord (ctx, next) {
         merger.save('nodebuffer',function (data) {
             fs.writeFileSync(`${folderPath}/维修工单.docx`, data, function(err){})
         })
+
+        for (const file of mergeArr){
+            fs.unlink(file, function (error) {
+                if(error){
+                    logger.log('删除维修子工单失败:' + error, "error")
+                }else {
+                    logger.log('删除维修子工单成功')
+                }
+            })
+        }
 
         ctx.body = { code: 0 , message: '导出维修工单成功', data: `/${companyNum}/repairOrder/维修工单.docx` }
     } catch (err) {
