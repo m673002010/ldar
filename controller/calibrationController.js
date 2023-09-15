@@ -26,6 +26,9 @@ async function queryCalibration (ctx, next) {
 async function importCalibration (ctx, next) {
     try {
         const { importData = [] } = ctx.request.body
+
+        console.log('========', importData)
+        return
         
         const data = importData.map(item => { 
             item.calibrationDate = new Date(item.calibrationDate)
