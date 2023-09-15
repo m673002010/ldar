@@ -66,6 +66,7 @@ async function detectionDataLedger (ctx, next) {
             item.valueBeforeRepair = item.detectNetWorth
             item.backgroundValueBeforeRepair = item.detectBackgroundValue
             item.leakLevel = '安全'
+            item.limitTime = item.detectEndDate - item.detectStartDate
 
             return item
         })
@@ -138,6 +139,7 @@ async function exportDetectionDataLedger (ctx, next) {
             item.valueBeforeRepair = item.detectNetWorth
             item.backgroundValueBeforeRepair = item.detectBackgroundValue
             item.leakLevel = '安全'
+            item.limitTime = Math.floor((item.detectEndDate - item.detectStartDate) / 1000)
 
             return item
         })
