@@ -1,6 +1,7 @@
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
 const pictureLedgerCollection = require('../db/pictureLedger.js')
+const { ObjectId } = require('mongodb')
 const lodash = require('lodash')
 
 async function queryRetestInfo (ctx, next) {
@@ -26,6 +27,7 @@ async function queryRetestInfo (ctx, next) {
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         retestInfoData = retestInfoData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            if (component) delete component._id
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })
@@ -81,7 +83,22 @@ async function importRetestInfo (ctx, next) {
     }
 }
 
+async function delayRepair (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+        const { _id = '', isDelayRepair = '', delayRepairReason = '' } = ctx.request.body
+
+        await detectLedgerCollection.updateOne({ companyNum, _id: ObjectId(_id) }, { $set: { isDelayRepair, delayRepairReason } })
+
+        ctx.body = { code: 0 , message: '延迟修改成功' }
+    } catch (err) {
+        logger.log('delayRepair异常:' + err, "error")
+        ctx.body = { code: -1 , message: '延迟修改失败' }
+    }
+}
+
 module.exports = {
     queryRetestInfo,
-    importRetestInfo
+    importRetestInfo,
+    delayRepair
 }

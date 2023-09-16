@@ -145,6 +145,7 @@ router.post('/api/exportRepairOrder/exportWord', eroController.exportWord)
 const uriController = require('./controller/uriController')
 router.get('/api/uploadRetestInfo/queryRetestInfo', uriController.queryRetestInfo)
 router.post('/api/uploadRetestInfo/importRetestInfo', uriController.importRetestInfo)
+router.post('/api/uploadRetestInfo/delayRepair', uriController.delayRepair)
 
 // 组件信息台账
 const cilController = require('./controller/cilController')

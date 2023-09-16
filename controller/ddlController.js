@@ -55,6 +55,7 @@ async function detectionDataLedger (ctx, next) {
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         detectData = detectData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            if (component) delete component._id
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })
@@ -130,6 +131,7 @@ async function exportDetectionDataLedger (ctx, next) {
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         detectData = detectData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            if (component) delete component._id
             Object.assign(item, component)
 
             // 导出表格字段调整

@@ -35,6 +35,7 @@ async function queryRepairInfo (ctx, next) {
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         repairInfoData = repairInfoData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            if (component) delete component._id
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })

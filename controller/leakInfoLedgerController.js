@@ -48,6 +48,7 @@ async function queryLeakInfoLedger (ctx, next) {
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         leakData = leakData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            if (component) delete component._id
             Object.assign(item, component)
 
             const pic = lodash.find(pictures, { 'label': item.label })
@@ -108,6 +109,7 @@ async function exportLeakInfoLedger (ctx, next) {
         const componentData = await componentCollection.find({ companyNum, labelExpand: { $in: labelExpandArr } }).toArray()
         leakData = leakData.map(item => {
             const component = lodash.find(componentData, { 'labelExpand': item.labelExpand })
+            if (component) delete component._id
             Object.assign(item, component)
 
             // 导出表格字段调整
