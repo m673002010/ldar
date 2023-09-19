@@ -61,6 +61,9 @@ async function statisticCtea (ctx, next) {
                 if (item.retestValue && item.retestBackgroundValue && item.retestValue - item.retestBackgroundValue <= item.threshold) obj.repairCount++
             }
 
+            obj.leakRate = (obj.leakCount / obj.detectionCount * 100).toFixed(2) + '%'
+            obj.leakRateAfterRepair = ((obj.leakCount - obj.repairCount) / obj.detectionCount * 100).toFixed(2) + '%'
+
             cteaData.push(obj)
         }
 
