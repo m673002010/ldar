@@ -199,6 +199,7 @@ router.post('/api/icr/deleteIcr', icrController.deleteIcr)
 // 组件类型排放分析
 const cteaController = require('./controller/cteaController')
 router.get('/api/ctea/componentTypeEmissionAnalysis', cteaController.componentTypeEmissionAnalysis)
+router.post('/api/ctea/statisticCtea', cteaController.statisticCtea)
 router.post('/api/ctea/addCtea', cteaController.addCtea)
 router.post('/api/ctea/editCtea', cteaController.editCtea)
 router.post('/api/ctea/deleteCtea', cteaController.deleteCtea)
