@@ -206,6 +206,7 @@ router.post('/api/ctea/deleteCtea', cteaController.deleteCtea)
 // 泄露区间分布
 const leakIntervalController = require('./controller/leakIntervalController')
 router.get('/api/leakInterval/queryLeakInterval', leakIntervalController.queryLeakInterval)
+router.post('/api/leakInterval/statisticLeakInterval', leakIntervalController.statisticLeakInterval)
 router.post('/api/leakInterval/addLeakInterval', leakIntervalController.addLeakInterval)
 router.post('/api/leakInterval/editLeakInterval', leakIntervalController.editLeakInterval)
 router.post('/api/leakInterval/deleteLeakInterval', leakIntervalController.deleteLeakInterval)
