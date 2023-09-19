@@ -66,6 +66,11 @@ async function statisticLeakInterval (ctx, next) {
             quarterCode = '',
         } = ctx.request.body
 
+        if (!quarterCode) {
+            ctx.body = { code: 0 , message: '缺少周期参数' }
+            return
+        }
+
         // 根据装置名称汇总分类数据
         const detectData = await detectLedgerCollection.find({ companyNum, quarterCode, isLeak: "是" }).toArray()
         const detectObj = lodash.groupBy(detectData, 'device')
