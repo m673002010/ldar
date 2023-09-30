@@ -47,6 +47,9 @@ async function queryRepairInfo (ctx, next) {
 
         if (componentType) repairInfoData = lodash.filter(repairInfoData, item => { return item.componentType === componentType })
 
+        // 复测值-复测背景值 > 阈值，则继续返回数据
+        repairInfoData = lodash.filter(repairInfoData, item => { return item.retestValue - item.retestBackgroundValue > item.threshold })
+
         ctx.body = { code: 0 , message: '查询复测信息成功', data: repairInfoData }
     } catch (err) {
         logger.log('queryRepairInfo异常:' + err, "error")

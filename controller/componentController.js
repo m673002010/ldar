@@ -21,7 +21,7 @@ async function importComponent (ctx, next) {
             sealPointTypeMap[c.componentType] = c.sealPointType
         }
 
-        // 导入组件数据，排除重复上传的组件
+        // 上传组件
         const data = importData.map(item => {
             Object.assign(item, { companyNum })
             item.labelExpand = item.label + '-' + item.expand
@@ -30,12 +30,26 @@ async function importComponent (ctx, next) {
             return item
         })
 
+        // 已有组件
         const oldData = await componentCollection.find({ companyNum }).toArray()
 
+        // 提取labelExpand
         const labelExpands = lodash.map(data, 'labelExpand')
         const oldLabelExpands = lodash.map(oldData, 'labelExpand')
-        const newLabelExpands = lodash.uniq(lodash.difference(labelExpands, oldLabelExpands))
+        
+        // 更新旧组件信息，先删除再插入
+        const updateLabelExpands = lodash.uniq(lodash.intersection(labelExpands, oldLabelExpands))
+        const updateData = updateLabelExpands.map(ule => {
+            const item = lodash.find(data, { 'labelExpand': ule })
 
+            return item
+        })
+
+        await componentCollection.deleteMany({ companyNum, labelExpand: { $in: updateLabelExpands } })
+        await componentCollection.insertMany(updateData)
+
+        // 新增组件
+        const newLabelExpands = lodash.uniq(lodash.difference(labelExpands, oldLabelExpands))
         const newData = newLabelExpands.map(nle => {
             const item = lodash.find(data, { 'labelExpand': nle })
 
