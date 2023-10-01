@@ -9,10 +9,17 @@ const Docxtemplater = require("docxtemplater")
 const ImageModule = require('docxtemplater-image-module-free')
 const DocxMerger = require('docx-merger')
 
+const quarterMap = {
+    '第1季度': 'First-Ldar-Quarter',
+    '第2季度': 'Second-Ldar-Quarter',
+    '第3季度': 'Third-Ldar-Quarter',
+    '第4季度': 'Fourth-Ldar-Quarter',
+}
+
 async function queryRepairInfo (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
-        const { device = '', area = '', equipment = '', componentType = '', isLeak = '', isDelayRepair = '', date } = ctx.request.body
+        const { device = '', area = '', equipment = '', componentType = '', isLeak = '', isDelayRepair = '', year = '', quarter = '' } = ctx.request.body
 
         const query = { companyNum }
         if (device) query.device = device
@@ -20,10 +27,6 @@ async function queryRepairInfo (ctx, next) {
         if (equipment) query.equipment = equipment
         if (isLeak) query.isLeak = isLeak
         if (isDelayRepair) query.isDelayRepair = isDelayRepair
-        if (date && date.length) {
-            query.retestStartDate = { $gte: new Date(date[0]) }
-            query.retestEndDate = { $lte: new Date(date[1]) }
-        }
 
         let repairInfoData = await detectLedgerCollection.find(query).toArray()
 
@@ -46,6 +49,11 @@ async function queryRepairInfo (ctx, next) {
         })
 
         if (componentType) repairInfoData = lodash.filter(repairInfoData, item => { return item.componentType === componentType })
+        if (year) repairInfoData = lodash.filter(repairInfoData, item => { return item.quarterCode.indexOf(year) !== -1 })
+        if (quarter) {
+            const quarterCode = quarterMap[quarter]
+            repairInfoData = lodash.filter(repairInfoData, item => { return item.quarterCode.indexOf(quarterCode) !== -1 })
+        }
 
         // 复测值-复测背景值 > 阈值，则继续返回数据
         repairInfoData = lodash.filter(repairInfoData, item => { return item.retestValue - item.retestBackgroundValue > item.threshold })
