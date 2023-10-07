@@ -23,21 +23,21 @@ async function queryCalibration (ctx, next) {
     }
 }
 
-async function importCalibration (ctx, next) {
+async function addCalibration (ctx, next) {
     try {
-        const { importData = [] } = ctx.request.body
+        const { addData = [] } = ctx.request.body
         
-        const data = importData.map(item => { 
+        const data = addData.map(item => { 
             item.calibrationDate = new Date(item.calibrationDate)
             return item
         })
 
         await calibrationCollection.insertMany(data)
         
-        ctx.body = { code: 0 , message: '导入校准数据成功' }
+        ctx.body = { code: 0 , message: '添加校准数据成功' }
     } catch (err) {
-        logger.log('importCalibration异常:' + err, "error")
-        ctx.body = { code: -1 , message: '导入校准数据异常' }
+        logger.log('addCalibration异常:' + err, "error")
+        ctx.body = { code: -1 , message: '添加校准数据异常' }
     }
 }
 
@@ -57,6 +57,6 @@ async function deleteCalibration (ctx, next) {
 
 module.exports = {
     queryCalibration,
-    importCalibration,
+    addCalibration,
     deleteCalibration
 }

@@ -229,7 +229,7 @@ router.post('/api/standardGas/deleteStandardGas', standardGasController.deleteSt
 // 校准管理
 const calibrationController = require('./controller/calibrationController')
 router.post('/api/calibration/queryCalibration', calibrationController.queryCalibration)
-router.post('/api/calibration/importCalibration', calibrationController.importCalibration)
+router.post('/api/calibration/addCalibration', calibrationController.addCalibration)
 router.post('/api/calibration/deleteCalibration', calibrationController.deleteCalibration)
 
 // 气象参数

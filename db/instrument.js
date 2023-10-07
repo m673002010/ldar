@@ -1,7 +1,7 @@
 /**
 {
-    serialNumber: String,
-    testInstrument: String,
+    instrumentNum: String,
+    instrument: String,
     finalPrecisionTime: Date,
     responseTime: String,
     invalidTime: Date,

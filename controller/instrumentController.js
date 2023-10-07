@@ -4,12 +4,12 @@ const { ObjectId } = require('mongodb')
 
 async function queryInstrument (ctx, next) {
     try {
-        const { serialNumber = '', testInstrument = '' } = ctx.request.query
+        const { instrumentNum = '', instrument = '' } = ctx.request.query
         
         const query = {}
 
-        if (serialNumber) query.serialNumber = serialNumber
-        if (testInstrument) query.testInstrument = testInstrument
+        if (instrumentNum) query.instrumentNum = instrumentNum
+        if (instrument) query.instrument = instrument
 
         const data = await instrumentCollection.find(query).toArray()
         
@@ -23,9 +23,9 @@ async function queryInstrument (ctx, next) {
 async function addInstrument (ctx, next) {
     try {
         const { username } = ctx.userInfo
-        const { serialNumber = '', testInstrument = '', finalPrecisionTime = '', invalidTime = '', responseTime = 0 } = ctx.request.body
+        const { instrumentNum = '', instrument = '', finalPrecisionTime = '', invalidTime = '', responseTime = 0 } = ctx.request.body
 
-        const data = { serialNumber, testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime) }
+        const data = { instrumentNum, instrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime) }
         Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
 
         await instrumentCollection.insertOne(data)
@@ -40,11 +40,11 @@ async function addInstrument (ctx, next) {
 async function editInstrument (ctx, next) {
     try {
         const { username } = ctx.userInfo
-        const { _id = '', serialNumber = '', testInstrument = '', finalPrecisionTime = '', invalidTime = '' , responseTime = 0 } = ctx.request.body
+        const { _id = '', instrumentNum = '', instrument = '', finalPrecisionTime = '', invalidTime = '' , responseTime = 0 } = ctx.request.body
 
         await instrumentCollection.updateOne({ _id: ObjectId(_id) }, { 
             $set: { 
-                serialNumber, testInstrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime), editDate: new Date(), editUser: username 
+                instrumentNum, instrument, finalPrecisionTime: new Date(finalPrecisionTime), responseTime: +responseTime, invalidTime: new Date(invalidTime), editDate: new Date(), editUser: username 
             } 
         })
         
