@@ -192,9 +192,9 @@ router.post('/api/ecr/deleteEcr', ecrController.deleteEcr)
 // 仪器校准记录单
 const icrController = require('./controller/icrController')
 router.post('/api/icr/instrumentCalibrationRecord', icrController.instrumentCalibrationRecord)
-router.post('/api/icr/addIcr', icrController.addIcr)
-router.post('/api/icr/editIcr', icrController.editIcr)
-router.post('/api/icr/deleteIcr', icrController.deleteIcr)
+// router.post('/api/icr/addIcr', icrController.addIcr)
+// router.post('/api/icr/editIcr', icrController.editIcr)
+// router.post('/api/icr/deleteIcr', icrController.deleteIcr)
 
 // 组件类型排放分析
 const cteaController = require('./controller/cteaController')

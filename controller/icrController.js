@@ -1,4 +1,5 @@
-const icrCollection = require('../db/instrumentCalibrationRecord.js')
+// const icrCollection = require('../db/instrumentCalibrationRecord.js')
+const calibrationCollection = require('../db/calibration.js')
 const { ObjectId } = require('mongodb')
 const lodash = require('lodash')
 
@@ -7,14 +8,48 @@ async function instrumentCalibrationRecord (ctx, next) {
         const { companyNum } = ctx.userInfo
         const { date } = ctx.request.body
         const query = {}
-        if (companyNum) query.companyNum = companyNum
+
         if (date && date.length) {
             const startDate = date[0]
             const endDate = date[1]
             query.calibrationDate = { $gte:new Date(startDate), $lte:new Date(endDate) }
         }
 
-        const data = await icrCollection.find(query).toArray()
+        // 校准管理的数据
+        const result = await calibrationCollection.find(query).toArray()
+
+        // 根据委托编号划分
+        const map = {}
+        for (const item of result) {
+            const consignID = item.consignID
+            if (!consignID) continue
+            if (!map[consignID]) map[consignID] = {}
+            map[consignID].calibrationDate = item.calibrationDate
+            map[consignID].instrumentNum = item.instrumentNum
+            map[consignID].calibrationPeople = item.calibrationPeople
+
+            if (item.standardGas === 'O2(21%)') { // 零气
+                map[consignID].dailyCalibration_1 = item.standardGasActual
+            } else if (!map[consignID].dailyCalibration_2) { // 标气1
+                map[consignID].dailyCalibration_2 = `${item.average}(${item.standardGasActual})`
+                map[consignID].driftCalibration_1 = `${item.driftAverage}(${item.standardGasActual})`
+            } else { // 标气2
+                map[consignID].dailyCalibration_3 = `${item.average}(${item.standardGasActual})`
+                map[consignID].driftCalibration_2 = `${item.driftAverage}(${item.standardGasActual})`
+            }
+
+            // 通过数值存在判断校准完成
+            if (map[consignID].dailyCalibration_1 && map[consignID].dailyCalibration_2 && map[consignID].dailyCalibration_3 && map[consignID].driftCalibration_1 && map[consignID].driftCalibration_2) {
+                map[consignID].isCalibration = '是'
+            } else {
+                map[consignID].isCalibration = '否'
+            }
+        }
+
+        const data = []
+        for (const key in map) {
+            data.push(map[key])
+        }
         
         ctx.body = { code: 0 , message: '查询仪器校准成功', data }
     } catch (err) {
