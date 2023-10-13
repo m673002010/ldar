@@ -4,13 +4,6 @@ const pictureLedgerCollection = require('../db/pictureLedger.js')
 const { ObjectId } = require('mongodb')
 const lodash = require('lodash')
 
-const quarterMap = {
-    '第1季度': 'First-Ldar-Quarter',
-    '第2季度': 'Second-Ldar-Quarter',
-    '第3季度': 'Third-Ldar-Quarter',
-    '第4季度': 'Fourth-Ldar-Quarter',
-}
-
 async function queryRetestInfo (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
@@ -48,10 +41,7 @@ async function queryRetestInfo (ctx, next) {
 
         if (componentType) retestInfoData = lodash.filter(retestInfoData, item => { return item.componentType === componentType })
         if (year) retestInfoData = lodash.filter(retestInfoData, item => { return item.quarterCode.indexOf(year) !== -1 })
-        if (quarter) {
-            const quarterCode = quarterMap[quarter]
-            retestInfoData = lodash.filter(retestInfoData, item => { return item.quarterCode.indexOf(quarterCode) !== -1 })
-        }
+        if (quarter) retestInfoData = lodash.filter(retestInfoData, item => { return item.quarterCode.indexOf(quarter) !== -1 })
 
         ctx.body = { code: 0 , message: '查询复测信息成功', data: retestInfoData }
     } catch (err) {

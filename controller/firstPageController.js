@@ -2,10 +2,10 @@ const assignmentCollection = require('../db/assignment')
 const componentCollection = require('../db/component')
 const lodash = require('lodash')
 const dateMap = {
-    'First-Ldar-Quarter': { start: 1, end: 3},
-    'Second-Ldar-Quarter': { start: 4, end: 6},
-    'Third-Ldar-Quarter': { start: 7, end: 9},
-    'Fourth-Ldar-Quarter': { start: 10, end:12 },
+    '第1季度': { start: 1, end: 3},
+    '第2季度': { start: 4, end: 6},
+    '第3季度': { start: 7, end: 9},
+    '第4季度': { start: 10, end:12 },
 }
 
 async function currentCycle (ctx, next) {

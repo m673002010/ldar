@@ -3,17 +3,12 @@ const assignOrderCollection = require('../db/assignOrder')
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
 const lodash = require('lodash')
-const quarterMap = {
-    '第1季度': 'First-Ldar-Quarter',
-    '第2季度': 'Second-Ldar-Quarter',
-    '第3季度': 'Third-Ldar-Quarter',
-    '第4季度': 'Fourth-Ldar-Quarter',
-}
+
 const dateMap = {
-    'First-Ldar-Quarter': { start: '01-01', end: '04-01'},
-    'Second-Ldar-Quarter': { start: '04-01', end:'07-01'},
-    'Third-Ldar-Quarter': { start: '07-01', end:'10-01'},
-    'Fourth-Ldar-Quarter': { start: '10-01', end:'01-01'},
+    '第1季度': { start: '01-01', end: '04-01'},
+    '第2季度': { start: '04-01', end:'07-01'},
+    '第3季度': { start: '07-01', end:'10-01'},
+    '第4季度': { start: '10-01', end:'01-01'},
 }
 
 async function queryAssignment (ctx, next) {
@@ -48,8 +43,7 @@ async function addAssignment (ctx, next) {
         const { year = '', quarter = '', detectType } = ctx.request.body
 
         // 拼接检测周期编号
-        const quarterCode = year + '-' + quarterMap[quarter]
-        const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
+        const quarterCode = year + '-' + quarter
 
         const data = {
             companyNum,
@@ -61,8 +55,8 @@ async function addAssignment (ctx, next) {
             assignedArr: [],
             detectedArr: [],
             leakFixArr: [],
-            startDate: year + '-' + dateMap[quarterStr].start,
-            endDate: year + '-' + dateMap[quarterStr].end,
+            startDate: year + '-' + dateMap[quarter].start,
+            endDate: year + '-' + dateMap[quarter].end,
             createDate: new Date(),
             createUser: username,
         }
@@ -165,7 +159,7 @@ async function assign (ctx, next) {
         }
 
         const year = quarterCode.split('-')[0]
-        const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
+        const quarter = quarterCode.split('-')[1]
 
         // 新增任务单
         const data = {
@@ -177,8 +171,8 @@ async function assign (ctx, next) {
             detectedArr: [],
             leakFixArr: [], 
             isFinished: '否',
-            startDate: year + '-' + dateMap[quarterStr].start,
-            endDate: year + '-' + dateMap[quarterStr].end,
+            startDate: year + '-' + dateMap[quarter].start,
+            endDate: year + '-' + dateMap[quarter].end,
             createDate: new Date(),
             createUser: username
         }
@@ -210,7 +204,7 @@ async function pick (ctx, next) {
         assignedArr = assignedArr.concat(assignArr)
 
         const year = quarterCode.split('-')[0]
-        const quarterStr = quarterCode.split('-')[1] + '-' + quarterCode.split('-')[2] + '-' + quarterCode.split('-')[3]
+        const quarter = quarterCode.split('-')[1]
 
         // 新增任务单
         const data = {
@@ -222,8 +216,8 @@ async function pick (ctx, next) {
             detectedArr: [],
             leakFixArr: [], 
             isFinished: '否',
-            startDate: year + '-' + dateMap[quarterStr].start,
-            endDate: year + '-' + dateMap[quarterStr].end,
+            startDate: year + '-' + dateMap[quarter].start,
+            endDate: year + '-' + dateMap[quarter].end,
             createDate: new Date(),
             createUser: username
         }

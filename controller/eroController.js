@@ -9,13 +9,6 @@ const Docxtemplater = require("docxtemplater")
 const ImageModule = require('docxtemplater-image-module-free')
 const DocxMerger = require('docx-merger')
 
-const quarterMap = {
-    '第1季度': 'First-Ldar-Quarter',
-    '第2季度': 'Second-Ldar-Quarter',
-    '第3季度': 'Third-Ldar-Quarter',
-    '第4季度': 'Fourth-Ldar-Quarter',
-}
-
 async function queryRepairInfo (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
@@ -50,10 +43,7 @@ async function queryRepairInfo (ctx, next) {
 
         if (componentType) repairInfoData = lodash.filter(repairInfoData, item => { return item.componentType === componentType })
         if (year) repairInfoData = lodash.filter(repairInfoData, item => { return item.quarterCode.indexOf(year) !== -1 })
-        if (quarter) {
-            const quarterCode = quarterMap[quarter]
-            repairInfoData = lodash.filter(repairInfoData, item => { return item.quarterCode.indexOf(quarterCode) !== -1 })
-        }
+        if (quarter) repairInfoData = lodash.filter(repairInfoData, item => { return item.quarterCode.indexOf(quarter) !== -1 })
 
         // 复测值-复测背景值 > 阈值，则继续返回数据
         repairInfoData = lodash.filter(repairInfoData, item => { return item.retestValue - item.retestBackgroundValue > item.threshold })

@@ -3,13 +3,6 @@ const componentCollection = require('../db/component')
 const pictureLedgerCollection = require('../db/pictureLedger.js')
 const lodash = require('lodash')
 
-const quarterMap = {
-    '第1季度': 'First-Ldar-Quarter',
-    '第2季度': 'Second-Ldar-Quarter',
-    '第3季度': 'Third-Ldar-Quarter',
-    '第4季度': 'Fourth-Ldar-Quarter',
-}
-
 async function detectionDataLedger (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
@@ -73,7 +66,7 @@ async function detectionDataLedger (ctx, next) {
         })
 
         if (year) detectData = lodash.filter(detectData, item => { return item.quarterCode.indexOf(year) !== -1 })
-        if (quarter) detectData = lodash.filter(detectData, item => { return item.quarterCode.indexOf(quarterMap[quarter]) !== -1 })
+        if (quarter) detectData = lodash.filter(detectData, item => { return item.quarterCode.indexOf(quarter) !== -1 })
         if (componentType) detectData = lodash.filter(detectData, item => { return item.componentType === componentType })
         if (medium) detectData = lodash.filter(detectData, item => { return item.medium === medium })
         if (mediumStatus) detectData = lodash.filter(detectData, item => { return item.mediumStatus === mediumStatus })
@@ -147,7 +140,7 @@ async function exportDetectionDataLedger (ctx, next) {
         })
 
         if (year) detectData = lodash.filter(detectData, item => { return item.quarterCode.indexOf(year) !== -1 })
-        if (quarter) detectData = lodash.filter(detectData, item => { return item.quarterCode.indexOf(quarterMap[quarter]) !== -1 })
+        if (quarter) detectData = lodash.filter(detectData, item => { return item.quarterCode.indexOf(quarter) !== -1 })
         if (componentType) detectData = lodash.filter(detectData, item => { return item.componentType === componentType })
         if (medium) detectData = lodash.filter(detectData, item => { return item.medium === medium })
         if (mediumStatus) detectData = lodash.filter(detectData, item => { return item.mediumStatus === mediumStatus })

@@ -3,13 +3,6 @@ const componentCollection = require('../db/component')
 const pictureLedgerCollection = require('../db/pictureLedger.js')
 const lodash = require('lodash')
 
-const quarterMap = {
-    '第1季度': 'First-Ldar-Quarter',
-    '第2季度': 'Second-Ldar-Quarter',
-    '第3季度': 'Third-Ldar-Quarter',
-    '第4季度': 'Fourth-Ldar-Quarter',
-}
-
 async function queryLeakInfoLedger (ctx, next) {
     try {
         const { companyNum } = ctx.userInfo
@@ -61,7 +54,7 @@ async function queryLeakInfoLedger (ctx, next) {
         })
 
         if (year) leakData = lodash.filter(leakData, item => { return item.quarterCode.indexOf(year) !== -1 })
-        if (quarter) leakData = lodash.filter(leakData, item => { return item.quarterCode.indexOf(quarterMap[quarter]) !== -1 })
+        if (quarter) leakData = lodash.filter(leakData, item => { return item.quarterCode.indexOf(quarter) !== -1 })
         if (componentType) leakData = lodash.filter(leakData, item => { return item.componentType === componentType })
         if (sealPointType) leakData = lodash.filter(leakData, item => { return item.sealPointType === sealPointType })
 
@@ -124,7 +117,7 @@ async function exportLeakInfoLedger (ctx, next) {
         })
 
         if (year) leakData = lodash.filter(leakData, item => { return item.quarterCode.indexOf(year) !== -1 })
-        if (quarter) leakData = lodash.filter(leakData, item => { return item.quarterCode.indexOf(quarterMap[quarter]) !== -1 })
+        if (quarter) leakData = lodash.filter(leakData, item => { return item.quarterCode.indexOf(quarter) !== -1 })
         if (componentType) leakData = lodash.filter(leakData, item => { return item.componentType === componentType })
         if (sealPointType) leakData = lodash.filter(leakData, item => { return item.sealPointType === sealPointType })
 
