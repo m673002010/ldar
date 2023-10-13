@@ -1,4 +1,6 @@
 const iDSCollection = require('../db/instrumentDetectionStatistics')
+const lodash = require('lodash')
+const { ObjectId } = require('mongodb')
 
 async function importData (ctx, next) {
     try {
@@ -10,6 +12,100 @@ async function importData (ctx, next) {
     } catch (err) {
         logger.log('importData异常:' + err, "error")
         ctx.body = { code: -1 , message: '导入数据失败' }
+    }
+}
+
+async function addIds (ctx, next) {
+    try {
+        const { username } = ctx.userInfo
+        const { 
+            year = '', 
+            quarter = '', 
+            instrumentNum = '', 
+            instrument = '', 
+            model = '', 
+            maintenance = '',
+            quantity = '',
+            calibrationUnit = '',
+            certificateNum = '',
+            description = '',
+        } = ctx.request.body
+
+        const data = { 
+            year, 
+            quarter, 
+            instrumentNum, 
+            instrument, 
+            model, 
+            maintenance,
+            quantity,
+            calibrationUnit,
+            certificateNum,
+            description,
+        }
+        Object.assign(data, { createDate: new Date(), createUser: username, editDate: new Date(), editUser: username })
+
+        await iDSCollection.insertOne(data)
+        
+        ctx.body = { code: 0 , message: '新增仪器检测统计成功' }
+    } catch (err) {
+        logger.log('addIds异常:' + err, "error")
+        ctx.body = { code: -1 , message: '新增仪器检测统计失败' }
+    }
+}
+
+async function editIds (ctx, next) {
+    try {
+        const { username } = ctx.userInfo
+        const { 
+            _id = '', 
+            year = '', 
+            quarter = '', 
+            instrumentNum = '', 
+            instrument = '', 
+            model = '', 
+            maintenance = '',
+            quantity = '',
+            calibrationUnit = '',
+            certificateNum = '',
+            description = '',
+        } = ctx.request.body
+
+        await iDSCollection.updateOne({ _id: ObjectId(_id) }, { 
+            $set: { 
+                year, 
+                quarter, 
+                instrumentNum, 
+                instrument, 
+                model,
+                maintenance,
+                quantity,
+                calibrationUnit,
+                certificateNum,
+                description,
+                editDate: new Date(), 
+                editUser: username 
+            } 
+        })
+        
+        ctx.body = { code: 0 , message: '编辑仪器检测统计成功' }
+    } catch (err) {
+        logger.log('editIds异常:' + err, "error")
+        ctx.body = { code: -1 , message: '编辑仪器检测统计失败' }
+    }
+}
+
+async function deleteIds (ctx, next) {
+    try {
+        const { deleteData } = ctx.request.body
+        const _idArr = lodash.map(deleteData, '_id').map(_id => ObjectId(_id))
+
+        await iDSCollection.deleteMany({ _id: { $in: _idArr } })
+        
+        ctx.body = { code: 0 , message: '删除仪器检测统计成功' }
+    } catch (err) {
+        logger.log('deleteIds异常:' + err, "error")
+        ctx.body = { code: -1 , message: '删除仪器检测统计失败' }
     }
 }
 
@@ -42,6 +138,9 @@ async function deleteData (ctx, next) {
 
 module.exports = {
     importData,
+    addIds,
+    editIds,
+    deleteIds,
     instrumentDetectionStatistics,
     deleteData
 }

@@ -270,6 +270,9 @@ router.post('/api/medium/deleteMedium', mediumController.deleteMedium)
 // 仪器检测统计
 const idsController = require('./controller/idsController')
 router.post('/api/ids/importData', idsController.importData)
+router.post('/api/ids/addIds', idsController.addIds)
+router.post('/api/ids/editIds', idsController.editIds)
+router.post('/api/ids/deleteIds', idsController.deleteIds)
 router.get('/api/ids/instrumentDetectionStatistics', idsController.instrumentDetectionStatistics)
 router.get('/api/ids/deleteData', idsController.deleteData)
 

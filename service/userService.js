@@ -186,7 +186,7 @@ async function userInfo (ctx, next) {
         if (role) {
             rights = await rightCollection.find({ rightId: { $in: role.rightIds }}).toArray()
         }
-        
+
         const rightTree = rightService.toTree(rights)
         Object.assign(userInfo, { rightTree })
         
