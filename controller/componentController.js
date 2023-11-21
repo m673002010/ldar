@@ -45,8 +45,10 @@ async function importComponent (ctx, next) {
             return item
         })
 
-        await componentCollection.deleteMany({ companyNum, labelExpand: { $in: updateLabelExpands } })
-        await componentCollection.insertMany(updateData)
+        if (updateData && updateData.length) {
+            await componentCollection.deleteMany({ companyNum, labelExpand: { $in: updateLabelExpands } })
+            await componentCollection.insertMany(updateData)
+        }
 
         // 新增组件
         const newLabelExpands = lodash.uniq(lodash.difference(labelExpands, oldLabelExpands))

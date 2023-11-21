@@ -1,5 +1,5 @@
 const MongoClient = require('mongodb').MongoClient
-const client = new MongoClient('mongodb://ldarAdmin:123456@localhost:27017/ldar')
+const client = new MongoClient('')
 
 async function fixRetestLedger (ctx, next) {
     try {

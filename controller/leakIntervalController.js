@@ -48,8 +48,8 @@ async function statisticLeakInterval (ctx, next) {
                 if (item.detectValue >= 2000 && item.detectValue < 10000) obj.ppm2000to10000++
                 if (item.detectValue >= 10000) obj.ppmMoreThan10000++
                 if (item.isDelayRepair === '是') obj.delayFix++
-                if (item.retestValue && item.retestBackgroundValue && item.retestValue - item.retestBackgroundValue > item.threshold) obj.nofixed++
-                if (item.retestValue && item.retestBackgroundValue && item.retestValue - item.retestBackgroundValue <= item.threshold) obj.haveFixed++
+                if (item.retestValue >=0 && item.retestBackgroundValue >=0 && item.retestValue - item.retestBackgroundValue > item.threshold) obj.nofixed++
+                if (item.retestValue >=0 && item.retestBackgroundValue >=0 && item.retestValue - item.retestBackgroundValue <= item.threshold) obj.haveFixed++
             }
 
             leakIntervalData.push(obj)
