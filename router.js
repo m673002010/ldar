@@ -118,6 +118,9 @@ router.get('/api/assignment/queryAssignDetail', assignmentController.queryAssign
 router.post('/api/assignment/deleteAssign', assignmentController.deleteAssign)
 router.post('/api/assignment/pick', assignmentController.pick)
 
+// 获取检测人
+router.get('/api/assignment/getDetectPeople', assignmentController.getDetectPeople)
+
 // 下载检测任务
 const ddtController = require('./controller/ddtController')
 router.get('/api/downloadDetectionTask/queryTask', ddtController.queryTask)

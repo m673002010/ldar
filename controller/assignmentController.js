@@ -293,6 +293,19 @@ async function queryAssignDetail (ctx, next) {
     }
 }
 
+async function getDetectPeople (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+        const assignOrderData = await assignOrderCollection.find({}).toArray()
+        const detectPeople = lodash.uniq(lodash.map(assignOrderData, 'detectPeople'))
+
+        ctx.body = { code: 0 , message: '查询检测人成功', data: detectPeople }
+    } catch (err) {
+        logger.log('getDetectPeople异常:' + err, "error")
+        ctx.body = { code: -1 , message: '查询检测人失败' }
+    }
+}
+
 module.exports = {
     queryAssignment,
     addAssignment,
@@ -302,4 +315,5 @@ module.exports = {
     pick,
     deleteAssign,
     queryAssignDetail,
+    getDetectPeople
 }
