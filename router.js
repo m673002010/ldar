@@ -159,6 +159,7 @@ router.get('/api/cil/exportComponentInfoLedger', cilController.exportComponentIn
 const ddlController = require('./controller/ddlController')
 router.post('/api/ddl/detectionDataLedger', ddlController.detectionDataLedger)
 router.post('/api/ddl/exportDetectionDataLedger', ddlController.exportDetectionDataLedger)
+router.post('/api/ddl/changeDetectValue', ddlController.changeDetectValue)
 
 // 组件图片台账
 const cplController = require('./controller/cplController')

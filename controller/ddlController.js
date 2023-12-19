@@ -1,6 +1,7 @@
 const detectLedgerCollection = require('../db/detectLedger')
 const componentCollection = require('../db/component')
 const pictureLedgerCollection = require('../db/pictureLedger.js')
+const { ObjectId } = require('mongodb')
 const lodash = require('lodash')
 
 async function detectionDataLedger (ctx, next) {
@@ -154,7 +155,30 @@ async function exportDetectionDataLedger (ctx, next) {
     }
 }
 
+async function changeDetectValue (ctx, next) {
+    try {
+        const { companyNum } = ctx.userInfo
+        const { 
+            _id = '',
+            detectValue = '', 
+        } = ctx.request.body
+    
+        const item = await detectLedgerCollection.findOne({ _id: ObjectId(_id) })
+    
+        if (item) {
+            const isLeak = detectValue - item.detectBackgroundValue > item.threshold ? "是" : "否"
+            await detectLedgerCollection.updateOne({ _id: ObjectId(_id) }, { $set: { detectValue: +detectValue, isLeak } })
+
+            ctx.body = { code: 0 , message: '修改检测值成功' }
+        }
+    } catch (err) {
+        logger.log('changeDetectValue异常:' + err, "error")
+        ctx.body = { code: -1 , message: '修改检测值失败' }
+    }
+}
+
 module.exports = {
     detectionDataLedger,
-    exportDetectionDataLedger
+    exportDetectionDataLedger,
+    changeDetectValue
 }
